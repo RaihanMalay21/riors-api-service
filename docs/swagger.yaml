@@ -1,0 +1,200 @@
+definitions:
+  controller.CategoryInput:
+    properties:
+      category:
+        type: string
+    type: object
+  controller.ProductInput:
+    properties:
+      categoryId:
+        type: integer
+      hargaProduct:
+        type: number
+      image:
+        type: string
+      namaProduct:
+        type: string
+      type:
+        type: string
+    type: object
+  controller.ResponseErrorBadRequest:
+    properties:
+      errorFields:
+        items:
+          additionalProperties:
+            type: string
+          type: object
+        type: array
+    type: object
+  controller.ResponseErrorInternalServer:
+    properties:
+      message:
+        type: string
+    type: object
+  controller.ResponseErrorNotFound:
+    properties:
+      message:
+        type: string
+    type: object
+  controller.ResponseSuccess:
+    properties:
+      Success:
+        type: string
+    type: object
+  dto.Category:
+    properties:
+      category:
+        maxLength: 100
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      product:
+        items:
+          $ref: '#/definitions/dto.Product'
+        type: array
+      updatedAt:
+        type: string
+    required:
+    - category
+    type: object
+  dto.Product:
+    properties:
+      categoryId:
+        type: integer
+      created_at:
+        type: string
+      hargaProduct:
+        type: number
+      id:
+        type: integer
+      image:
+        type: string
+      namaProduct:
+        maxLength: 100
+        type: string
+      type:
+        maxLength: 100
+        type: string
+      updated_at:
+        type: string
+    required:
+    - categoryId
+    - hargaProduct
+    - image
+    - namaProduct
+    - type
+    type: object
+info:
+  contact: {}
+paths:
+  /category:
+    get:
+      description: Get detailed information of all data category and product based
+        on category
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.Category'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseErrorInternalServer'
+      summary: Get All Data Category
+      tags:
+      - Category
+  /category/input:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Add a new category to the system
+      parameters:
+      - description: Category Input
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CategoryInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.ResponseSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseErrorInternalServer'
+      summary: post data Category
+      tags:
+      - Category
+  /product:
+    get:
+      description: Get detailed information of all data Product and detailProduct
+        by Id Product
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.Product'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseErrorInternalServer'
+      summary: Get All Data Product
+      tags:
+      - Product
+  /product/input:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Add a new Product to the system
+      parameters:
+      - description: Product Input
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/controller.ProductInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.ResponseSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ResponseErrorInternalServer'
+      summary: post data Product
+      tags:
+      - Product
+swagger: "2.0"

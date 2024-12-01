@@ -10,6 +10,8 @@ type ProductRepository interface {
 	GetAll() (*[]domain.Product, error)
 	Create(tx *gorm.DB, data *domain.Product) error
 	UpdateProductImage(tx *gorm.DB, data *domain.Product) error
+	GetAllMale() (*[]domain.Product, error)
+	GetAllFemale() (*[]domain.Product, error)
 }
 
 type productRepository struct {
@@ -48,4 +50,26 @@ func (dp *productRepository) UpdateProductImage(tx *gorm.DB, data *domain.Produc
 	}
 
 	return nil
+}
+
+// Get Product by gender
+
+func (dp *productRepository) GetAllMale() (*[]domain.Product, error) {
+	var data []domain.Product
+
+	if err := dp.db.Where("category_gender = ?", "Male").Find(&data).Error; err != nil {
+		return nil, err
+	}
+
+	return &data, nil
+}
+
+func (dp *productRepository) GetAllFemale() (*[]domain.Product, error) {
+	var data []domain.Product
+
+	if err := dp.db.Where("category_gender = ?", "Female").Find(&data).Error; err != nil {
+		return nil, err
+	}
+
+	return &data, nil
 }

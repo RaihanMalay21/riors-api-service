@@ -1,5 +1,7 @@
 package controller
 
+import "time"
+
 // response documentasi
 
 type ResponseErrorBadRequest struct {
@@ -28,4 +30,16 @@ type ProductInput struct {
 	HargaBarang float64 `json:"hargaProduct"`
 	Type        string  `json:"type"`
 	Image       string  `json:"image"`
+}
+
+type ResponseProduct struct {
+	Id             uint      `json:"id"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	CategoryId     uint      `json:"categoryId"`
+	ProductName    string    `json:"namaProduct"`
+	HargaBarang    float64   `json:"hargaProduct"`
+	Type           string    `json:"type"`
+	Image          string    `json:"image"`
+	CategoryGender string    `json:"categoryGender"`
 }

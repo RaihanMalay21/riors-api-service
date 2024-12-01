@@ -9,22 +9,23 @@ import (
 
 func ProductDTOTODomain(data *dto.Product) domain.Product {
 	return domain.Product{
-		CategoryId: data.CategoryId,
-		ProductName: data.ProductName,
-		HargaBarang: data.HargaBarang,
-		Type: data.Type,
-		Image: data.Image,
+		CategoryId:     data.CategoryId,
+		ProductName:    data.ProductName,
+		HargaBarang:    data.HargaBarang,
+		Type:           data.Type,
+		Image:          data.Image,
+		CategoryGender: data.CategoryGender,
 	}
 }
 
 func ProductDomainTODTO(data *domain.Product) dto.Product {
 	return dto.Product{
-		Id: data.Id,
-		CategoryId: data.CategoryId,
+		Id:          data.Id,
+		CategoryId:  data.CategoryId,
 		ProductName: data.ProductName,
 		HargaBarang: data.HargaBarang,
-		Type: data.Type,
-		Image: data.Image,
+		Type:        data.Type,
+		Image:       data.Image,
 	}
 }
 
@@ -38,7 +39,7 @@ func GetAllProductDomainTODTO(datas *[]domain.Product) *[]dto.Product {
 			defer group.Done()
 			dataDto[i] = ProductDomainTODTO(&data)
 		}(i, data)
-	} 
+	}
 
 	group.Wait()
 	return &dataDto

@@ -11,6 +11,8 @@ import (
 type ProductController interface {
 	GetAllProduct(e echo.Context) error
 	InputProduct(e echo.Context) error
+	GetAllMale(e echo.Context) error
+	GetAllFemale(e echo.Context) error
 }
 
 type productController struct {
@@ -25,7 +27,7 @@ func ConstructorProductController(service service.ProductService) ProductControl
 // @Description Get detailed information of all data Product and detailProduct by Id Product
 // @Tags Product
 // @Produce application/json
-// @Success 200  {object}  []dto.Product
+// @Success 200  {object}  []ResponseProduct
 // @Failure 404  {object}  ResponseErrorNotFound
 // @Failure 500  {object}  ResponseErrorInternalServer
 // @Router /product [get]
@@ -47,7 +49,7 @@ func (ps *productController) GetAllProduct(e echo.Context) error {
 // @Success 200  {object}  ResponseSuccess
 // @Failure 400  {object}  ResponseErrorBadRequest
 // @Failure 500  {object}  ResponseErrorInternalServer
-// @Router /product/input [post]
+// @Router /product [post]
 func (ps *productController) InputProduct(e echo.Context) error {
 	var response = make(map[string]interface{})
 
@@ -60,14 +62,15 @@ func (ps *productController) InputProduct(e echo.Context) error {
 	hargaBarang, _ := strconv.ParseFloat(e.FormValue("hargaProduct"), 64)
 
 	data := dto.Product{
-		CategoryId:  uint(categoryId),
-		ProductName: e.FormValue("namaProduct"),
-		HargaBarang: hargaBarang,
-		Type:        e.FormValue("typeProduct"),
-		Image:       fileHeader.Filename,
-		FileSize:    uint(fileHeader.Size),
-		Ext:         Ext,
-		ImageType: filetype,
+		CategoryId:     uint(categoryId),
+		ProductName:    e.FormValue("namaProduct"),
+		HargaBarang:    hargaBarang,
+		Type:           e.FormValue("typeProduct"),
+		Image:          fileHeader.Filename,
+		CategoryGender: e.FormValue("categoryGender"),
+		FileSize:       uint(fileHeader.Size),
+		Ext:            Ext,
+		ImageType:      filetype,
 	}
 
 	StatusCode := ps.service.InputProduct(
@@ -78,4 +81,38 @@ func (ps *productController) InputProduct(e echo.Context) error {
 	)
 
 	return e.JSON(StatusCode, response)
+}
+
+// @summary Get All Data Product Male
+// @Description Get detailed information of all data Product Male
+// @Tags Product
+// @Produce application/json
+// @Success 200  {object}  []ResponseProduct
+// @Failure 404  {object}  ResponseErrorNotFound
+// @Failure 500  {object}  ResponseErrorInternalServer
+// @Router /product/male [get]
+func (ps *productController) GetAllMale(e echo.Context) error {
+	data, res, statusCode := ps.service.GetAllProductMale()
+	if statusCode != 200 {
+		return e.JSON(statusCode, res)
+	}
+
+	return e.JSON(statusCode, data)
+}
+
+// @summary Get All Data Product Female
+// @Description Get detailed information of all data Product Female
+// @Tags Product
+// @Produce application/json
+// @Success 200  {object}  []ResponseProduct
+// @Failure 404  {object}  ResponseErrorNotFound
+// @Failure 500  {object}  ResponseErrorInternalServer
+// @Router /product/female [get]
+func (ps *productController) GetAllFemale(e echo.Context) error {
+	data, res, statusCode := ps.service.GetAllProductFemale()
+	if statusCode != 200 {
+		return e.JSON(statusCode, res)
+	}
+
+	return e.JSON(statusCode, data)
 }

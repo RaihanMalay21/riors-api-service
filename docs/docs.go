@@ -112,7 +112,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.Product"
+                                "$ref": "#/definitions/controller.ResponseProduct"
                             }
                         }
                     },
@@ -129,9 +129,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/product/input": {
+            },
             "post": {
                 "description": "Add a new Product to the system",
                 "consumes": [
@@ -166,6 +164,76 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/controller.ResponseErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/female": {
+            "get": {
+                "description": "Get detailed information of all data Product Female",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Get All Data Product Female",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controller.ResponseProduct"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseErrorNotFound"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/male": {
+            "get": {
+                "description": "Get detailed information of all data Product Male",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Get All Data Product Male",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controller.ResponseProduct"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseErrorNotFound"
                         }
                     },
                     "500": {
@@ -237,6 +305,38 @@ const docTemplate = `{
                 }
             }
         },
+        "controller.ResponseProduct": {
+            "type": "object",
+            "properties": {
+                "categoryGender": {
+                    "type": "string"
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "hargaProduct": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "namaProduct": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "controller.ResponseSuccess": {
             "type": "object",
             "properties": {
@@ -261,51 +361,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "product": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.Product"
-                    }
-                },
                 "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.Product": {
-            "type": "object",
-            "required": [
-                "categoryId",
-                "hargaProduct",
-                "image",
-                "namaProduct",
-                "type"
-            ],
-            "properties": {
-                "categoryId": {
-                    "type": "integer"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "hargaProduct": {
-                    "type": "number"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "namaProduct": {
-                    "type": "string",
-                    "maxLength": 100
-                },
-                "type": {
-                    "type": "string",
-                    "maxLength": 100
-                },
-                "updated_at": {
                     "type": "string"
                 }
             }

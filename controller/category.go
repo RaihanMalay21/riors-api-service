@@ -59,3 +59,5 @@ func (cs *categoryController) InputCategory(e echo.Context) error {
 
 	return e.JSON(statusCode, response)
 }
+
+

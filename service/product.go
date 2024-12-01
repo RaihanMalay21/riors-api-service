@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/RaihanMalay21/api-service-riors/domain"
 	"github.com/RaihanMalay21/api-service-riors/mapper"
 	"github.com/RaihanMalay21/api-service-riors/repository"
 
@@ -11,8 +12,10 @@ import (
 )
 
 type ProductService interface {
-	GetAllProduct() (*[]dto.Product, map[string]string, int)
+	GetAllProduct() (*[]domain.Product, map[string]string, int)
 	InputProduct(file multipart.File, fileHeader *multipart.FileHeader, data *dto.Product, response map[string]interface{}) int
+	GetAllProductMale() (*[]domain.Product, map[string]string, int)
+	GetAllProductFemale() (*[]domain.Product, map[string]string, int)
 }
 
 type productService struct {
@@ -23,16 +26,14 @@ func ConstructorProductService(repository repository.ProductRepository) ProductS
 	return &productService{repository: repository}
 }
 
-func (pr *productService) GetAllProduct() (*[]dto.Product, map[string]string, int) {
+func (pr *productService) GetAllProduct() (*[]domain.Product, map[string]string, int) {
 	data, err := pr.repository.GetAll()
 	if err != nil {
 		response := map[string]string{"message": "Internal Server encountered an Error"}
 		return nil, response, http.StatusInternalServerError
 	}
 
-	dataDto := mapper.GetAllProductDomainTODTO(data)
-
-	return dataDto, nil, http.StatusOK
+	return data, nil, http.StatusOK
 }
 
 func (pr *productService) InputProduct(file multipart.File, fileHeader *multipart.FileHeader, data *dto.Product, response map[string]interface{}) int {
@@ -43,6 +44,15 @@ func (pr *productService) InputProduct(file multipart.File, fileHeader *multipar
 	dataDomain := mapper.ProductDTOTODomain(data)
 
 	tx := pr.repository.NewTransactionProduct()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+		if tx != nil {
+			tx.Rollback()
+		}
+	}()
 
 	if err := pr.repository.Create(tx, &dataDomain); err != nil {
 		tx.Rollback()
@@ -67,4 +77,24 @@ func (pr *productService) InputProduct(file multipart.File, fileHeader *multipar
 
 	response["success"] = "Berhasil Memasukkan Product"
 	return http.StatusOK
+}
+
+func (pr *productService) GetAllProductMale() (*[]domain.Product, map[string]string, int) {
+	data, err := pr.repository.GetAllMale()
+	if err != nil {
+		response := map[string]string{"message": "Internal Server encountered an Error"}
+		return nil, response, http.StatusInternalServerError
+	}
+
+	return data, nil, http.StatusOK
+}
+
+func (pr *productService) GetAllProductFemale() (*[]domain.Product, map[string]string, int) {
+	data, err := pr.repository.GetAllFemale()
+	if err != nil {
+		response := map[string]string{"message": "Internal Server encountered an Error"}
+		return nil, response, http.StatusInternalServerError
+	}
+
+	return data, nil, http.StatusOK
 }

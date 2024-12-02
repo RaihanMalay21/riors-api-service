@@ -16,7 +16,7 @@ type Product struct {
 	HargaBarang    float64         `gorm:"type:DECIMAL(10, 0);not null"  json:"hargaProduct"`
 	Type           string          `gorm:"varchar(100);not null" json:"type"`
 	Image          string          `gorm:"varchar(200)" json:"image"`
-	CategoryGender string          `gorm:"type:category_gender;not null" json:"categoryGender"`
+	CategoryGender string          `gorm:"type:gender_category;not null" json:"categoryGender"`
 	Category       Category        `gorm:"foreignKey:CategoryId;references:Id" json:"-"`
 	DetailProduct  []DetailProduct `json:"-"`
 }

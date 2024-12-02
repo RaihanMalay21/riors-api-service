@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/RaihanMalay21/api-service-riors/domain"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -18,9 +17,6 @@ var (
 )
 
 func ConnectionDB() {
-	if err := godotenv.Load(); err != nil {
-		fmt.Print("Error invalid load read file .env")
-	}
 	userDB := os.Getenv("DB_USER")
 	passwordDB := os.Getenv("DB_PASSWORD")
 	host := os.Getenv("DB_HOST")

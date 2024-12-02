@@ -3,3 +3,5 @@
 .vscode/
 
 assets/
+
+repository/preapare_test.go

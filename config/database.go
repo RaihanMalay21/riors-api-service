@@ -34,6 +34,7 @@ func ConnectionDB() {
 			TablePrefix:   "riors_", // Prefix table
 			SingularTable: true,     // bentuk tunggal
 		},
+		PrepareStmt: true,
 	})
 
 	if err != nil {

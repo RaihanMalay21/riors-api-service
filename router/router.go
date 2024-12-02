@@ -17,6 +17,6 @@ func InitRouter(e *echo.Echo, product controller.ProductController, category con
 	e.GET("/product", product.GetAllProduct)
 	e.POST("/product", product.InputProduct)
 	e.GET("/product/male", product.GetAllMale)
-	e.GET("/Product/female", product.GetAllFemale)
+	e.GET("/product/female", product.GetAllFemale)
 
 }

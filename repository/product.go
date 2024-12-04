@@ -57,7 +57,7 @@ func (dp *productRepository) UpdateProductImage(tx *gorm.DB, data *domain.Produc
 func (dp *productRepository) GetAllMale() (*[]domain.Product, error) {
 	var data []domain.Product
 
-	if err := dp.db.Where("category_gender = ?", "Male").Find(&data).Error; err != nil {
+	if err := dp.db.Where("category_gender = ?", "Man").Find(&data).Error; err != nil {
 		return nil, err
 	}
 
@@ -67,7 +67,7 @@ func (dp *productRepository) GetAllMale() (*[]domain.Product, error) {
 func (dp *productRepository) GetAllFemale() (*[]domain.Product, error) {
 	var data []domain.Product
 
-	if err := dp.db.Where("category_gender = ?", "Female").Find(&data).Error; err != nil {
+	if err := dp.db.Where("category_gender = ?", "Woman").Find(&data).Error; err != nil {
 		return nil, err
 	}
 

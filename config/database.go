@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/RaihanMalay21/api-service-riors/domain"
+	// "github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

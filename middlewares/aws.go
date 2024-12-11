@@ -14,6 +14,7 @@ func InitAWSSession() (*session.Session, error) {
 	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 	bucketRegion := os.Getenv("BUCKET_REGION")
+	sufyEndpoint := os.Getenv("SUFY_ENDPOINT")
 
 	if awsAccessKeyID == "" || awsSecretAccessKey == "" || bucketRegion == "" {
 		return nil, fmt.Errorf("AWS credentials atau region belum diatur di environment variables")
@@ -21,7 +22,8 @@ func InitAWSSession() (*session.Session, error) {
 
 	// Membuat sesi AWS dengan konfigurasi
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(bucketRegion),
+		Region:   aws.String(bucketRegion),
+		Endpoint: aws.String(sufyEndpoint),
 	})
 	if err != nil {
 		return nil, err

@@ -103,8 +103,3 @@ func (as *authenticationController) SignupUserVerification(c echo.Context) error
 	return c.JSON(StatusCode, response)
 }
 
-// func (as *authenticationController) SignupUserVerificationPage(c echo.Context) error {
-// 	email := c.QueryParam("email")
-
-// 	return c.Render(http.StatusOK, "verification.html", map[string]string{"email": email})
-// }

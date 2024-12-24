@@ -1,4 +1,4 @@
-package controller
+package products
 
 import "time"
 
@@ -9,7 +9,7 @@ type ResponseErrorBadRequest struct {
 }
 
 type ResponseErrorInternalServer struct {
-	Message string `json:"message"`
+	Error string `json:"error"`
 }
 
 type ResponseErrorNotFound struct {

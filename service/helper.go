@@ -6,10 +6,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"math/rand"
 	"mime/multipart"
+	"net/smtp"
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/RaihanMalay21/api-service-riors/domain"
 	"github.com/RaihanMalay21/api-service-riors/middlewares"
@@ -77,6 +80,61 @@ func UploadToS3(data *domain.Product, file multipart.File, fileHeader *multipart
 		ACL:         aws.String("public-read"),
 	}); err != nil {
 		return fmt.Errorf("gagal mengunggah file ke S3: %v", err)
+	}
+
+	return nil
+}
+
+func GenerateRandomNumber() int {
+	rand.Seed(time.Now().UnixNano())
+
+	randomNumber := rand.Intn(90000000) + 10000000
+
+	return randomNumber
+}
+
+func EmailVerificationCode(email *string, verificationCode *int) error {
+	Auth := smtp.PlainAuth(
+		"",
+		"cabangbanyak@gmail.com",
+		"lnbq rahl xyyg fwcy",
+		"smtp.gmail.com",
+	)
+
+	// Subjek email
+	subject := "Verifikasi Email Anda"
+
+	// Isi body email
+	body := fmt.Sprintf(`
+		<html>
+			<body style="font-family: Arial, sans-serif; line-height: 1.6; color: white; font-size: 12px">
+				<p>Halo,</p>
+				<p>Terima kasih telah mendaftar di layanan kami. Berikut adalah kode verifikasi Anda:</p>
+				<p style="font-size: 18px; font-weight: bold;">Kode Verifikasi: %d</p>
+				<p>Masukkan kode ini untuk menyelesaikan proses registrasi Anda.</p>
+				<p>Jika Anda tidak merasa mendaftar di layanan kami, abaikan email ini.</p>
+				<p>Salam,</p>
+				<p>Tim Riors</p>
+			</body>
+		</html>
+	`, *verificationCode)
+
+	// Header MIME untuk mendukung encoding multipart jika ada lampiran
+	header := "MIME-Version: 1.0\r\n" +
+		"Content-Type: text/html; charset=\"UTF-8\"\r\n"
+
+	msg := []byte("To: " + *email + "\r\n" +
+		"Subject: " + subject + "\r\n" + header + "\r\n" + body)
+
+	// kirim mesage ke email user
+	if err := smtp.SendMail(
+		"smtp.gmail.com:587",
+		Auth,
+		"cabangbanyak@gmail.com",
+		[]string{*email},
+		msg,
+	); err != nil {
+		return err
 	}
 
 	return nil

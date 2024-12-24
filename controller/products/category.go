@@ -1,9 +1,9 @@
-package controller
+package products
 
 import (
 	_ "github.com/RaihanMalay21/api-service-riors/docs"
 	"github.com/RaihanMalay21/api-service-riors/dto"
-	"github.com/RaihanMalay21/api-service-riors/service"
+	service "github.com/RaihanMalay21/api-service-riors/service/products"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,9 +25,9 @@ func ConstructorCategoryController(service service.CategoryService) CategoryCont
 // @Description Get detailed information of all data category and product based on category
 // @Tags Category
 // @Produce  application/json
-// @Success 200  {object}  []dto.Category
-// @Failure 404  {object}  ResponseErrorNotFound
-// @Failure 500  {object}  ResponseErrorInternalServer
+// @Success 200 {object} []dto.Category "Successfully retrieved list of categories with details"
+// @Failure 404 {object} ResponseErrorNotFound "No categories found"
+// @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /category [get]
 func (cs *categoryController) GetAllCategory(e echo.Context) error {
 	data, res, statusCode := cs.service.GetAllCategory()
@@ -44,9 +44,9 @@ func (cs *categoryController) GetAllCategory(e echo.Context) error {
 // @accept  application/x-www-form-urlencoded
 // @produce  application/json
 // @Param category body CategoryInput true "Category Input"
-// @Success 200  {object}  ResponseSuccess
-// @Failure 400  {object}  ResponseErrorBadRequest
-// @Failure 500  {object}  ResponseErrorInternalServer
+// @Success 200 {object} ResponseSuccess "Category successfully added to the system"
+// @Failure 400 {object} ResponseErrorBadRequest "Invalid request or incomplete category data"
+// @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /category/input [post]
 func (cs *categoryController) InputCategory(e echo.Context) error {
 	var response = make(map[string]interface{})
@@ -59,5 +59,3 @@ func (cs *categoryController) InputCategory(e echo.Context) error {
 
 	return e.JSON(statusCode, response)
 }
-
-

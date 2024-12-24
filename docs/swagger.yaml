@@ -1,10 +1,60 @@
 definitions:
-  controller.CategoryInput:
+  authentication.RegisterUser:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  authentication.ResponsAuthorization:
+    properties:
+      message:
+        type: string
+    type: object
+  authentication.ResponseErrorBadRequest:
+    properties:
+      ErrorField:
+        items:
+          additionalProperties:
+            type: string
+          type: object
+        type: array
+    type: object
+  authentication.ResponseErrorInternalServer:
+    properties:
+      error:
+        type: string
+    type: object
+  authentication.ResponseSuccess:
+    properties:
+      success:
+        type: string
+    type: object
+  authentication.Verification:
+    properties:
+      code:
+        type: integer
+    type: object
+  dto.Category:
+    properties:
+      category:
+        maxLength: 100
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      updatedAt:
+        type: string
+    required:
+    - category
+    type: object
+  products.CategoryInput:
     properties:
       category:
         type: string
     type: object
-  controller.ProductInput:
+  products.ProductInput:
     properties:
       categoryId:
         type: integer
@@ -17,7 +67,7 @@ definitions:
       type:
         type: string
     type: object
-  controller.ResponseErrorBadRequest:
+  products.ResponseErrorBadRequest:
     properties:
       errorFields:
         items:
@@ -26,17 +76,17 @@ definitions:
           type: object
         type: array
     type: object
-  controller.ResponseErrorInternalServer:
+  products.ResponseErrorInternalServer:
+    properties:
+      error:
+        type: string
+    type: object
+  products.ResponseErrorNotFound:
     properties:
       message:
         type: string
     type: object
-  controller.ResponseErrorNotFound:
-    properties:
-      message:
-        type: string
-    type: object
-  controller.ResponseProduct:
+  products.ResponseProduct:
     properties:
       categoryGender:
         type: string
@@ -57,24 +107,10 @@ definitions:
       updated_at:
         type: string
     type: object
-  controller.ResponseSuccess:
+  products.ResponseSuccess:
     properties:
       Success:
         type: string
-    type: object
-  dto.Category:
-    properties:
-      category:
-        maxLength: 100
-        type: string
-      createdAt:
-        type: string
-      id:
-        type: integer
-      updatedAt:
-        type: string
-    required:
-    - category
     type: object
 info:
   contact: {}
@@ -87,19 +123,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Successfully retrieved list of categories with details
           schema:
             items:
               $ref: '#/definitions/dto.Category'
             type: array
         "404":
-          description: Not Found
+          description: No categories found
           schema:
-            $ref: '#/definitions/controller.ResponseErrorNotFound'
+            $ref: '#/definitions/products.ResponseErrorNotFound'
         "500":
-          description: Internal Server Error
+          description: Internal server error while processing the request
           schema:
-            $ref: '#/definitions/controller.ResponseErrorInternalServer'
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
       summary: Get All Data Category
       tags:
       - Category
@@ -114,47 +150,80 @@ paths:
         name: category
         required: true
         schema:
-          $ref: '#/definitions/controller.CategoryInput'
+          $ref: '#/definitions/products.CategoryInput'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Category successfully added to the system
           schema:
-            $ref: '#/definitions/controller.ResponseSuccess'
+            $ref: '#/definitions/products.ResponseSuccess'
         "400":
-          description: Bad Request
+          description: Invalid request or incomplete category data
           schema:
-            $ref: '#/definitions/controller.ResponseErrorBadRequest'
+            $ref: '#/definitions/products.ResponseErrorBadRequest'
         "500":
-          description: Internal Server Error
+          description: Internal server error while processing the request
           schema:
-            $ref: '#/definitions/controller.ResponseErrorInternalServer'
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
       summary: post data Category
       tags:
       - Category
-  /product:
-    get:
-      description: Get detailed information of all data Product and detailProduct
-        by Id Product
+  /login/user:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: This enpoint is used to authenticate users with send cridential
+        data (email dan password).
+      parameters:
+      - description: Login Input
+        in: body
+        name: Login
+        required: true
+        schema:
+          $ref: '#/definitions/authentication.RegisterUser'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Successfuly login, return a token to access enpoint for user
+          schema:
+            $ref: '#/definitions/authentication.ResponseSuccess'
+        "400":
+          description: Request invalid or the data sent is incorrect
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorBadRequest'
+        "500":
+          description: Mistake in the server
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorInternalServer'
+      summary: User Login
+      tags:
+      - authentication
+  /product:
+    get:
+      description: This endpoint is used to retrieve a list of all products along
+        with detailed information for each product. It also allows you to get the
+        details of a specific product by its ID. The response will include information
+        like product name, description, price, and other relevant details.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved list of products and their details
           schema:
             items:
-              $ref: '#/definitions/controller.ResponseProduct'
+              $ref: '#/definitions/products.ResponseProduct'
             type: array
         "404":
-          description: Not Found
+          description: Products not found
           schema:
-            $ref: '#/definitions/controller.ResponseErrorNotFound'
+            $ref: '#/definitions/products.ResponseErrorNotFound'
         "500":
-          description: Internal Server Error
+          description: Internal server error while processing the request
           schema:
-            $ref: '#/definitions/controller.ResponseErrorInternalServer'
-      summary: Get All Data Product
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
+      summary: Retrieve All Product Data
       tags:
       - Product
     post:
@@ -167,22 +236,22 @@ paths:
         name: category
         required: true
         schema:
-          $ref: '#/definitions/controller.ProductInput'
+          $ref: '#/definitions/products.ProductInput'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Product successfully added to the system
           schema:
-            $ref: '#/definitions/controller.ResponseSuccess'
+            $ref: '#/definitions/products.ResponseSuccess'
         "400":
-          description: Bad Request
+          description: Invalid request or incomplete product data
           schema:
-            $ref: '#/definitions/controller.ResponseErrorBadRequest'
+            $ref: '#/definitions/products.ResponseErrorBadRequest'
         "500":
-          description: Internal Server Error
+          description: Internal server error while processing the request
           schema:
-            $ref: '#/definitions/controller.ResponseErrorInternalServer'
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
       summary: post data Product
       tags:
       - Product
@@ -193,19 +262,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Successfully retrieved list of female products with details
           schema:
             items:
-              $ref: '#/definitions/controller.ResponseProduct'
+              $ref: '#/definitions/products.ResponseProduct'
             type: array
         "404":
-          description: Not Found
+          description: No female products found
           schema:
-            $ref: '#/definitions/controller.ResponseErrorNotFound'
+            $ref: '#/definitions/products.ResponseErrorNotFound'
         "500":
-          description: Internal Server Error
+          description: Internal server error while processing the request
           schema:
-            $ref: '#/definitions/controller.ResponseErrorInternalServer'
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
       summary: Get All Data Product Female
       tags:
       - Product
@@ -216,20 +285,92 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Successfully retrieved list of male products with details
           schema:
             items:
-              $ref: '#/definitions/controller.ResponseProduct'
+              $ref: '#/definitions/products.ResponseProduct'
             type: array
         "404":
-          description: Not Found
+          description: No male products found
           schema:
-            $ref: '#/definitions/controller.ResponseErrorNotFound'
+            $ref: '#/definitions/products.ResponseErrorNotFound'
         "500":
-          description: Internal Server Error
+          description: Internal server error while processing the request
           schema:
-            $ref: '#/definitions/controller.ResponseErrorInternalServer'
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
       summary: Get All Data Product Male
       tags:
       - Product
+  /signup/user:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint is used to create a new user account by submitting
+        registration data in JSON format. Users are required to provide information
+        email, and password. The data will be validated on the server side before
+        the account is created temporary, client have navigate to endpoint signup
+        verification on the client side.
+      parameters:
+      - description: User Registration Data (name, email, password)
+        in: body
+        name: Signup
+        required: true
+        schema:
+          $ref: '#/definitions/authentication.RegisterUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account successfully created temporery, return a token to verification
+            email
+          schema:
+            $ref: '#/definitions/authentication.ResponseSuccess'
+        "400":
+          description: Invalid request or incomplete data
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorBadRequest'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorInternalServer'
+      summary: Create New User Account
+      tags:
+      - authentication
+  /signup/verification:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: This endpoint is used to verify the user's email during the registration
+        process. A verification code is sent to the user's email, and the user must
+        input this code to complete the signup process successfully. The request must
+        include the verification code in the form body.
+      parameters:
+      - description: Email Verification Data (code)
+        in: body
+        name: Signup
+        required: true
+        schema:
+          $ref: '#/definitions/authentication.Verification'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email successfully verified, account registration completed
+          schema:
+            $ref: '#/definitions/authentication.ResponseSuccess'
+        "400":
+          description: Invalid or missing verification code
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorBadRequest'
+        "401":
+          description: Unauthorized - Missing or invalid token
+          schema:
+            $ref: '#/definitions/authentication.ResponsAuthorization'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorInternalServer'
+      summary: Verify User Email for Signup
+      tags:
+      - authentication
 swagger: "2.0"

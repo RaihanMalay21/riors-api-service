@@ -7,6 +7,7 @@ import (
 
 func main() {
 	config.ConnectionDB()
+	config.ConnectionRedis()
 
 	e := boostrap.SetupDependencies()
 

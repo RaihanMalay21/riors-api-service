@@ -1,9 +1,10 @@
-package service
+package products
 
 import (
 	"github.com/RaihanMalay21/api-service-riors/domain"
 	"github.com/RaihanMalay21/api-service-riors/mapper"
-	"github.com/RaihanMalay21/api-service-riors/repository"
+	repository "github.com/RaihanMalay21/api-service-riors/repository/products"
+	service "github.com/RaihanMalay21/api-service-riors/service"
 
 	"mime/multipart"
 	"net/http"
@@ -29,7 +30,7 @@ func ConstructorProductService(repository repository.ProductRepository) ProductS
 func (pr *productService) GetAllProduct() (*[]domain.Product, map[string]string, int) {
 	data, err := pr.repository.GetAll()
 	if err != nil {
-		response := map[string]string{"message": "Internal Server encountered an Error"}
+		response := map[string]string{"error": "Internal Server encountered an Error"}
 		return nil, response, http.StatusInternalServerError
 	}
 
@@ -37,7 +38,7 @@ func (pr *productService) GetAllProduct() (*[]domain.Product, map[string]string,
 }
 
 func (pr *productService) InputProduct(file multipart.File, fileHeader *multipart.FileHeader, data *dto.Product, response map[string]interface{}) int {
-	if err := ValidateStructProduct(data, response); err != nil {
+	if err := service.ValidateStructProduct(data, response); err != nil {
 		return http.StatusBadRequest
 	}
 
@@ -56,20 +57,20 @@ func (pr *productService) InputProduct(file multipart.File, fileHeader *multipar
 
 	if err := pr.repository.Create(tx, &dataDomain); err != nil {
 		tx.Rollback()
-		response["message"] = err.Error()
+		response["error"] = err.Error()
 		return http.StatusInternalServerError
 	}
 
-	if err := UploadToS3(&dataDomain, file, fileHeader, data.Ext, data.ImageType); err != nil {
+	if err := service.UploadToS3(&dataDomain, file, fileHeader, data.Ext, data.ImageType); err != nil {
 		tx.Rollback()
-		response["message"] = err.Error()
+		response["error"] = err.Error()
 		return http.StatusInternalServerError
 	}
 
 	// update data barang
 	if err := pr.repository.UpdateProductImage(tx, &dataDomain); err != nil {
 		tx.Rollback()
-		response["message"] = err.Error()
+		response["error"] = err.Error()
 		return http.StatusInternalServerError
 	}
 
@@ -82,7 +83,7 @@ func (pr *productService) InputProduct(file multipart.File, fileHeader *multipar
 func (pr *productService) GetAllProductMale() (*[]domain.Product, map[string]string, int) {
 	data, err := pr.repository.GetAllMale()
 	if err != nil {
-		response := map[string]string{"message": "Internal Server encountered an Error"}
+		response := map[string]string{"error": "Internal Server encountered an Error"}
 		return nil, response, http.StatusInternalServerError
 	}
 
@@ -92,7 +93,7 @@ func (pr *productService) GetAllProductMale() (*[]domain.Product, map[string]str
 func (pr *productService) GetAllProductFemale() (*[]domain.Product, map[string]string, int) {
 	data, err := pr.repository.GetAllFemale()
 	if err != nil {
-		response := map[string]string{"message": "Internal Server encountered an Error"}
+		response := map[string]string{"error": "Internal Server encountered an Error"}
 		return nil, response, http.StatusInternalServerError
 	}
 

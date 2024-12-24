@@ -2,27 +2,35 @@ package boostrap
 
 import (
 	"github.com/RaihanMalay21/api-service-riors/config"
-	"github.com/RaihanMalay21/api-service-riors/controller"
-	"github.com/RaihanMalay21/api-service-riors/repository"
+	controllerProducts "github.com/RaihanMalay21/api-service-riors/controller/products"
+	repositoryProducts "github.com/RaihanMalay21/api-service-riors/repository/products"
+	serviceProducts "github.com/RaihanMalay21/api-service-riors/service/products"
+	controllerAuth "github.com/RaihanMalay21/api-service-riors/controller/authentication"
+	repositoryAuth "github.com/RaihanMalay21/api-service-riors/repository/authentication"
+	serviceAuth "github.com/RaihanMalay21/api-service-riors/service/authentication"
 	"github.com/RaihanMalay21/api-service-riors/router"
-	"github.com/RaihanMalay21/api-service-riors/service"
 	"github.com/labstack/echo/v4"
 )
 
 func SetupDependencies() *echo.Echo{
 	e := echo.New()
 	db := config.DB
+	client := config.Conn
 
-	repoProduct := repository.ConstructorProductRepository(db)
-	repoCategory := repository.ConstructorCategoryRepository(db)
+	repoProduct := repositoryProducts.ConstructorProductRepository(db)
+	serviceProduct := serviceProducts.ConstructorProductService(repoProduct)
+	controllerProduct := controllerProducts.ConstructorProductController(serviceProduct)
+	
+	repoCategory := repositoryProducts.ConstructorCategoryRepository(db)
+	serviceCategory := serviceProducts.ConstructorCategoryService(repoCategory)
+	controllerCategory := controllerProducts.ConstructorCategoryController(serviceCategory)
 
-	serviceProduct := service.ConstructorProductService(repoProduct)
-	serviceCategory := service.ConstructorCategoryService(repoCategory)
+	repoAuth := repositoryAuth.ConstructorAuthenticationRepository(db, client)
+	serviceAuth := serviceAuth.ConstructorAuthenticationService(repoAuth)
+	controllerAuth := controllerAuth.ConstructorAuthenticationController(serviceAuth)
 
-	controllerProduct := controller.ConstructorProductController(serviceProduct)
-	controllerCategory := controller.ConstructorCategoryController(serviceCategory)
 
-	router.InitRouter(e, controllerProduct, controllerCategory)
+	router.InitRouter(e, controllerProduct, controllerCategory, controllerAuth)
 
 	return e
 }

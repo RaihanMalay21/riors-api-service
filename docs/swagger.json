@@ -16,7 +16,7 @@
                 "summary": "Get All Data Category",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Successfully retrieved list of categories with details",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -25,15 +25,15 @@
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "No categories found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorNotFound"
+                            "$ref": "#/definitions/products.ResponseErrorNotFound"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error while processing the request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorInternalServer"
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
                         }
                     }
                 }
@@ -59,27 +59,73 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.CategoryInput"
+                            "$ref": "#/definitions/products.CategoryInput"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Category successfully added to the system",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseSuccess"
+                            "$ref": "#/definitions/products.ResponseSuccess"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request or incomplete category data",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorBadRequest"
+                            "$ref": "#/definitions/products.ResponseErrorBadRequest"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error while processing the request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorInternalServer"
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/login/user": {
+            "post": {
+                "description": "This enpoint is used to authenticate users with send cridential data (email dan password).",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "User Login",
+                "parameters": [
+                    {
+                        "description": "Login Input",
+                        "name": "Login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authentication.RegisterUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfuly login, return a token to access enpoint for user",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseSuccess"
+                        }
+                    },
+                    "400": {
+                        "description": "Request invalid or the data sent is incorrect",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Mistake in the server",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorInternalServer"
                         }
                     }
                 }
@@ -87,34 +133,34 @@
         },
         "/product": {
             "get": {
-                "description": "Get detailed information of all data Product and detailProduct by Id Product",
+                "description": "This endpoint is used to retrieve a list of all products along with detailed information for each product. It also allows you to get the details of a specific product by its ID. The response will include information like product name, description, price, and other relevant details.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Product"
                 ],
-                "summary": "Get All Data Product",
+                "summary": "Retrieve All Product Data",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Successfully retrieved list of products and their details",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/controller.ResponseProduct"
+                                "$ref": "#/definitions/products.ResponseProduct"
                             }
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "Products not found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorNotFound"
+                            "$ref": "#/definitions/products.ResponseErrorNotFound"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error while processing the request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorInternalServer"
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
                         }
                     }
                 }
@@ -138,27 +184,27 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.ProductInput"
+                            "$ref": "#/definitions/products.ProductInput"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Product successfully added to the system",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseSuccess"
+                            "$ref": "#/definitions/products.ResponseSuccess"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request or incomplete product data",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorBadRequest"
+                            "$ref": "#/definitions/products.ResponseErrorBadRequest"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error while processing the request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorInternalServer"
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
                         }
                     }
                 }
@@ -176,24 +222,24 @@
                 "summary": "Get All Data Product Female",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Successfully retrieved list of female products with details",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/controller.ResponseProduct"
+                                "$ref": "#/definitions/products.ResponseProduct"
                             }
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "No female products found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorNotFound"
+                            "$ref": "#/definitions/products.ResponseErrorNotFound"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error while processing the request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorInternalServer"
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
                         }
                     }
                 }
@@ -211,24 +257,122 @@
                 "summary": "Get All Data Product Male",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Successfully retrieved list of male products with details",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/controller.ResponseProduct"
+                                "$ref": "#/definitions/products.ResponseProduct"
                             }
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "No male products found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorNotFound"
+                            "$ref": "#/definitions/products.ResponseErrorNotFound"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error while processing the request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseErrorInternalServer"
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup/user": {
+            "post": {
+                "description": "This endpoint is used to create a new user account by submitting registration data in JSON format. Users are required to provide information email, and password. The data will be validated on the server side before the account is created temporary, client have navigate to endpoint signup verification on the client side.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Create New User Account",
+                "parameters": [
+                    {
+                        "description": "User Registration Data (name, email, password)",
+                        "name": "Signup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authentication.RegisterUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account successfully created temporery, return a token to verification email",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseSuccess"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or incomplete data",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup/verification": {
+            "post": {
+                "description": "This endpoint is used to verify the user's email during the registration process. A verification code is sent to the user's email, and the user must input this code to complete the signup process successfully. The request must include the verification code in the form body.",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Verify User Email for Signup",
+                "parameters": [
+                    {
+                        "description": "Email Verification Data (code)",
+                        "name": "Signup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authentication.Verification"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Email successfully verified, account registration completed",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseSuccess"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or missing verification code",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorBadRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Missing or invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponsAuthorization"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorInternalServer"
                         }
                     }
                 }
@@ -236,7 +380,85 @@
         }
     },
     "definitions": {
-        "controller.CategoryInput": {
+        "authentication.RegisterUser": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "authentication.ResponsAuthorization": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "authentication.ResponseErrorBadRequest": {
+            "type": "object",
+            "properties": {
+                "ErrorField": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "authentication.ResponseErrorInternalServer": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "authentication.ResponseSuccess": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "string"
+                }
+            }
+        },
+        "authentication.Verification": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.Category": {
+            "type": "object",
+            "required": [
+                "category"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "products.CategoryInput": {
             "type": "object",
             "properties": {
                 "category": {
@@ -244,7 +466,7 @@
                 }
             }
         },
-        "controller.ProductInput": {
+        "products.ProductInput": {
             "type": "object",
             "properties": {
                 "categoryId": {
@@ -264,7 +486,7 @@
                 }
             }
         },
-        "controller.ResponseErrorBadRequest": {
+        "products.ResponseErrorBadRequest": {
             "type": "object",
             "properties": {
                 "errorFields": {
@@ -278,7 +500,15 @@
                 }
             }
         },
-        "controller.ResponseErrorInternalServer": {
+        "products.ResponseErrorInternalServer": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "products.ResponseErrorNotFound": {
             "type": "object",
             "properties": {
                 "message": {
@@ -286,15 +516,7 @@
                 }
             }
         },
-        "controller.ResponseErrorNotFound": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "controller.ResponseProduct": {
+        "products.ResponseProduct": {
             "type": "object",
             "properties": {
                 "categoryGender": {
@@ -326,31 +548,10 @@
                 }
             }
         },
-        "controller.ResponseSuccess": {
+        "products.ResponseSuccess": {
             "type": "object",
             "properties": {
                 "Success": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.Category": {
-            "type": "object",
-            "required": [
-                "category"
-            ],
-            "properties": {
-                "category": {
-                    "type": "string",
-                    "maxLength": 100
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }

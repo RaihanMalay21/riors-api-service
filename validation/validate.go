@@ -1,6 +1,8 @@
 package validation
 
 import (
+	"unicode"
+
 	"github.com/RaihanMalay21/api-service-riors/config"
 	"github.com/RaihanMalay21/api-service-riors/domain"
 
@@ -36,6 +38,59 @@ func RegisterCustomValidationsProduct(validate *validator.Validate, trans ut.Tra
 		return t
 	})
 
+	validate.RegisterValidation("minUppercase", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isMinUppercase(content)
+	})
+
+	validate.RegisterTranslation("minUppercase", trans, func(ut ut.Translator) error {
+		return ut.Add("minUppercase", "harus mengandung minimal satu huruf kapital.", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("minUppercase", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("minNumber", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isMinNumber(content)
+	})
+
+	validate.RegisterTranslation("minNumber", trans, func(ut ut.Translator) error {
+		return ut.Add("minNumber", "harus mengandung minimal satu number.", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("minNumber", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("minUniCharacter", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isMinUniCharacter(content)
+	})
+
+	validate.RegisterTranslation("minUniCharacter", trans, func(ut ut.Translator) error {
+		return ut.Add("minUniCharacter", "harus mengandung minimal satu spesial karakter.", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("minUniCharacter", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("uniqueEmail", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isUniqueEmail(content)
+	})
+
+	validate.RegisterTranslation("uniqueEmail", trans, func(ut ut.Translator) error {
+		return ut.Add("uniqueEmail", "Email sudah terdaftar", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("uniqueEmail", fe.Field())
+		return t
+	})
+
+	// validate.RegisterValidation("minUppercase", func(fl validator.FieldLevel) bool {
+	// 	sizeFile := fl.Field.string()
+	// 	return
+	// })
+
 	// validate.RegisterValidation("typeExt", func(fl validator.FieldLevel) bool {
 	// 	ext := fl.Field().String()
 	// 	return isAllowedExtention(ext)
@@ -64,11 +119,27 @@ func RegisterCustomValidationsProduct(validate *validator.Validate, trans ut.Tra
 		return t
 	})
 
+	validate.RegisterTranslation("min", trans, func(ut ut.Translator) error {
+		return ut.Add("min", "Minimal Panjang Hanya {0} Karakter", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		Param := fe.Param()
+		t, _ := ut.T("min", Param)
+		return t
+	})
+
 	validate.RegisterTranslation("number", trans, func(ut ut.Translator) error {
 		return ut.Add("number", "Harus Berupa Angka", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		Param := fe.Field()
 		t, _ := ut.T("number", Param)
+		return t
+	})
+
+	validate.RegisterTranslation("email", trans, func(ut ut.Translator) error {
+		return ut.Add("email", "harus berupa email", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		Param := fe.Field()
+		t, _ := ut.T("email", Param)
 		return t
 	})
 
@@ -81,6 +152,44 @@ func isMaxSizeFile(Size uint) bool {
 func isUniqueProduct(productName string) bool {
 	var product domain.Product
 	if err := config.DB.Where("product_name = ?", productName).First(&product).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return true
+		}
+		return false
+	}
+	return false
+}
+
+func isMinUppercase(content string) bool {
+	for _, char := range content {
+		if char >= 'A' && char <= 'Z' {
+			return true
+		}
+	}
+	return false
+}
+
+func isMinNumber(content string) bool {
+	for _, char := range content {
+		if char >= '0' && char <= '9' {
+			return true
+		}
+	}
+	return false
+}
+
+func isMinUniCharacter(content string) bool {
+	for _, char := range content {
+		if unicode.IsPunct(char) || unicode.IsSymbol(char) {
+			return true
+		}
+	}
+	return false
+}
+
+func isUniqueEmail(email string) bool {
+	var user domain.User
+	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return true
 		}

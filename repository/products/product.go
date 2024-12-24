@@ -1,4 +1,4 @@
-package repository
+package products
 
 import (
 	"github.com/RaihanMalay21/api-service-riors/domain"

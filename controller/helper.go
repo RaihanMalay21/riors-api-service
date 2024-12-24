@@ -16,7 +16,7 @@ func GetFileFromForm(e echo.Context, response map[string]interface{}) (multipart
 			response["ErrorField"] = []map[string]string{{"image": "required"}}
 			return nil, nil, "", "", http.StatusBadRequest
 		}
-		response["message"] = err.Error()
+		response["error"] = err.Error()
 		return nil, nil, "", "", http.StatusInternalServerError
 	}
 
@@ -25,13 +25,12 @@ func GetFileFromForm(e echo.Context, response map[string]interface{}) (multipart
 	ext := filepath.Ext(fileHeader.Filename)
 
 	validMimeTypes := map[string]string{
-        ".jpeg": "image/jpeg",
-        ".jpg":  "image/jpeg",
-        ".png":  "image/png",
-        ".gif":  "image/gif",
-        ".svg":  "image/svg+xml",
-    }
-
+		".jpeg": "image/jpeg",
+		".jpg":  "image/jpeg",
+		".png":  "image/png",
+		".gif":  "image/gif",
+		".svg":  "image/svg+xml",
+	}
 
 	validMime, ok := validMimeTypes[ext]
 	if !ok || validMime != fileType {
@@ -39,10 +38,9 @@ func GetFileFromForm(e echo.Context, response map[string]interface{}) (multipart
 		return nil, nil, "", "", http.StatusBadRequest
 	}
 
-
 	file, err := fileHeader.Open()
 	if err != nil {
-		response["message"] = err.Error()
+		response["error"] = err.Error()
 		return nil, nil, "", "", http.StatusInternalServerError
 	}
 	defer file.Close()

@@ -1,12 +1,11 @@
-package service
+package products
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/RaihanMalay21/api-service-riors/dto"
 	"github.com/RaihanMalay21/api-service-riors/mapper"
-	"github.com/RaihanMalay21/api-service-riors/repository"
+	repository "github.com/RaihanMalay21/api-service-riors/repository/products"
 	"github.com/RaihanMalay21/api-service-riors/validation"
 	"github.com/go-playground/validator/v10"
 )
@@ -27,8 +26,7 @@ func ConstructorCategoryService(repo repository.CategoryRepository) CategoryServ
 func (rc *categoryService) GetAllCategory() (*[]dto.Category, map[string]string, int) {
 	data, err := rc.repo.GetAll()
 	if err != nil {
-		fmt.Print(err)
-		response := map[string]string{"message": "Internal Server encountered an Error"}
+		response := map[string]string{"error": "Internal Server encountered an Error"}
 		return nil, response, http.StatusInternalServerError
 	}
 
@@ -58,7 +56,7 @@ func (rc *categoryService) InputCategory(data *dto.Category, response map[string
 	dataDomain := mapper.CategoryDTOTODomain(data)
 
 	if err := rc.repo.Create(&dataDomain); err != nil {
-		response["message"] = err.Error()
+		response["error"] = err.Error()
 		return http.StatusInternalServerError
 	}
 

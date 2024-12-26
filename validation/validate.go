@@ -1,6 +1,8 @@
 package validation
 
 import (
+	"regexp"
+	"time"
 	"unicode"
 
 	"github.com/RaihanMalay21/api-service-riors/config"
@@ -74,15 +76,111 @@ func RegisterCustomValidationsProduct(validate *validator.Validate, trans ut.Tra
 		return t
 	})
 
-	validate.RegisterValidation("uniqueEmail", func(fl validator.FieldLevel) bool {
+	validate.RegisterValidation("uniqueEmailUser", func(fl validator.FieldLevel) bool {
 		content := fl.Field().String()
-		return isUniqueEmail(content)
+		return isUniqueEmailUser(content)
 	})
 
-	validate.RegisterTranslation("uniqueEmail", trans, func(ut ut.Translator) error {
-		return ut.Add("uniqueEmail", "Email sudah terdaftar", true)
+	validate.RegisterTranslation("uniqueEmailUser", trans, func(ut ut.Translator) error {
+		return ut.Add("uniqueEmailUser", "Email sudah terdaftar", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("uniqueEmail", fe.Field())
+		t, _ := ut.T("uniqueEmailUser", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("uniqueEmailEmployee", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isUniqueEmailEmployee(content)
+	})
+
+	validate.RegisterTranslation("uniqueEmailEmployee", trans, func(ut ut.Translator) error {
+		return ut.Add("uniqueEmailEmployee", "Email sudah terdaftar", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("uniqueEmailEmployee", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("uniqueWAEmployee", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isUniqueWhatsappEmployee(content)
+	})
+
+	validate.RegisterTranslation("uniqueWAEmployee", trans, func(ut ut.Translator) error {
+		return ut.Add("uniqueWAEmployee", "Whatsapp sudah terdaftar", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("uniqueWAEmployee", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("uniqueWAUser", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isUniqueWhatshappUser(content)
+	})
+
+	validate.RegisterTranslation("uniqueWAUser", trans, func(ut ut.Translator) error {
+		return ut.Add("uniqueWAUser", "whatsapp sudah terdaftar", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("uniqueWAUser", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("whatsapp", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isWhatsapp(content)
+	})
+
+	validate.RegisterTranslation("whatsapp", trans, func(ut ut.Translator) error {
+		return ut.Add("whatsapp", "Format harus berupa nomor whatsapp", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("whatsapp", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("date_format", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isDateFormat(content)
+	})
+
+	validate.RegisterTranslation("date_format", trans, func(ut ut.Translator) error {
+		return ut.Add("date_format", "Format harus berupa tahun bulan tanggal", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("date_format", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("genderEmployee", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isGenderEmployee(content)
+	})
+
+	validate.RegisterTranslation("genderEmployee", trans, func(ut ut.Translator) error {
+		return ut.Add("genderEmployee", "Gender harus berupa man atau woman", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("genderEmployee", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("employementType", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isEmployementType(content)
+	})
+
+	validate.RegisterTranslation("employementType", trans, func(ut ut.Translator) error {
+		return ut.Add("employementType", "Jenis employee harus berupa tetap, kontrak, freelance", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("employementType", fe.Field())
+		return t
+	})
+
+	validate.RegisterValidation("positionEmployee", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isPositionEmployee(content)
+	})
+
+	validate.RegisterTranslation("positionEmployee", trans, func(ut ut.Translator) error {
+		return ut.Add("positionEmployee", "posisi employee harus berupa tetap, kontrak, freelance", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("positionEmployee", fe.Field())
 		return t
 	})
 
@@ -152,10 +250,7 @@ func isMaxSizeFile(Size uint) bool {
 func isUniqueProduct(productName string) bool {
 	var product domain.Product
 	if err := config.DB.Where("product_name = ?", productName).First(&product).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return true
-		}
-		return false
+		return errors.Is(err, gorm.ErrRecordNotFound)
 	}
 	return false
 }
@@ -187,13 +282,74 @@ func isMinUniCharacter(content string) bool {
 	return false
 }
 
-func isUniqueEmail(email string) bool {
+func isUniqueEmailUser(email string) bool {
 	var user domain.User
 	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return true
-		}
+		return errors.Is(err, gorm.ErrRecordNotFound)
+	}
+	return false
+}
+
+func isUniqueEmailEmployee(email string) bool {
+	var user domain.Employee
+	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		return errors.Is(err, gorm.ErrRecordNotFound)
+	}
+	return false
+}
+
+func isUniqueWhatshappUser(nomor string) bool {
+	var user domain.User
+	if err := config.DB.Where("whatsapp = ?", nomor).First(&user).Error; err != nil {
+		return errors.Is(err, gorm.ErrRecordNotFound)
+	}
+	return false
+}
+
+func isUniqueWhatsappEmployee(nomor string) bool {
+	var user domain.Employee
+	if err := config.DB.Where("whatsapp = ?", nomor).First(&user).Error; err != nil {
+		return errors.Is(err, gorm.ErrRecordNotFound)
+	}
+	return false
+}
+
+
+func isWhatsapp(nomor string) bool {
+	regex := `^\+?[0-9]{8,15}$`
+	re := regexp.MustCompile(regex)
+	return re.MatchString(nomor)
+}
+
+func isDateFormat(date string) bool {
+	dateRegex := `^\d{4}-\d{2}-\d{2}$` // yyyy-mm-dd
+	re := regexp.MustCompile(dateRegex)
+
+	if !re.MatchString(date) {
 		return false
+	}
+
+	_, err := time.Parse("2006-01-02", date)
+	return err == nil
+}
+
+func isGenderEmployee(gender string) bool {
+	if gender == "Man" || gender == "Woman" {
+		return true
+	}
+	return false
+}
+
+func isEmployementType(content string) bool {
+	if content == "Tetap" || content == "Kontrak" || content == "Freelance" {
+		return true
+	}
+	return false
+}
+
+func isPositionEmployee(content string) bool {
+	if content == "Staff" || content == "Owner" {
+		return true
 	}
 	return false
 }

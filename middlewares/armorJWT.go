@@ -161,3 +161,43 @@ func ArmorAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
+
+func ArmorOwner(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		response := make(map[string]interface{})
+
+		cookie, err := c.Cookie("owner_riors_token")
+		if err != nil {
+			response["message"] = "Token is missing"
+			return c.JSON(http.StatusUnauthorized, response)
+		}
+
+		tokenString := cookie.Value
+		claims := &config.JWTClaim{}
+
+		token, err := jwt.ParseWithClaims(tokenString, claims, func (t *jwt.Token) (interface{}, error)  {
+			return config.JWT_KEY, nil
+		})
+		if err != nil {
+			if errors.Is(err, jwt.ErrTokenSignatureInvalid){
+				response["message"] = "Token signature is invalid"
+				return c.JSON(http.StatusUnauthorized, response)
+			} else if errors.Is(err, jwt.ErrTokenExpired) {
+				response["message"] = "Token signature has Expired"
+				return c.JSON(http.StatusUnauthorized, response)
+			} else {
+				response["error"] = err.Error()
+				return c.JSON(http.StatusInternalServerError, response)
+			}
+		}
+
+		if claims, ok := token.Claims.(*config.JWTClaim); ok && token.Valid {
+			c.Set("owner_claims", claims)
+		} else {
+			response["message"] = "Unauthorized"
+			return c.JSON(http.StatusUnauthorized, response)
+		}
+
+		return next(c)
+	}
+}

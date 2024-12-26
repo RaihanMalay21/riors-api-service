@@ -12,10 +12,10 @@ type Address struct {
 	Province string `gorm:"varchar(50);not null"`
 	KabupatenKota string `gorm:"varchar(100);not null"`
 	Kecamatan string `gorm:"varchar(100);not null"`
-	Desa string `gorm:varchar(100);not null"`
+	Desa string `gorm:"varchar(100);not null"`
 	RT_RW string `gorm:"varchar(20);not null"`
 	NoHouse int `gorm:"int;not null"`
 	StreetName string `gorm:"varchar(100)"`
 	DetailAddress string `gorm:"Text;not null"`
-	User User `"gorm:"foreignKey:UserId;references:Id"`
+	User User `gorm:"foreignKey:UserId;references:Id"`
 }

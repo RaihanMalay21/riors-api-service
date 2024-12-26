@@ -13,7 +13,7 @@ type User struct {
 	UpdatedAt time.Time `gorm:"autoCreateTime" json:"UpdatedAt"`
 	UserName  string    `gorm:"varchar(100);unique"`
 	Email     string    `gorm:"varchar(100);unique"`
-	Whatshapp int       `gorm:"int;unique"`
+	Whatsapp  string    `gorm:"varchar(20);unique"`
 	Password  string    `gorm:"varchar(200)"`
 	Poin      float64   `gorm:"type:DECIMAL(10, 0)"`
 	Address   []Address `gorm:"foreignKey:UserId"`

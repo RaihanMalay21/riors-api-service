@@ -1,9 +1,12 @@
 package authentication
 
 import (
-	"fmt"
 	"net/http"
+	"os"
 
+	// "github.com/RaihanMalay21/api-service-riors/domain"
+	"github.com/RaihanMalay21/api-service-riors/config"
+	"github.com/RaihanMalay21/api-service-riors/controller"
 	"github.com/RaihanMalay21/api-service-riors/dto"
 	"github.com/RaihanMalay21/api-service-riors/middlewares"
 	service "github.com/RaihanMalay21/api-service-riors/service/authentication"
@@ -14,6 +17,10 @@ type AuthenticationController interface {
 	LoginUser(c echo.Context) error
 	SignupUser(c echo.Context) error
 	SignupUserVerification(c echo.Context) error
+	LoginAdmin(c echo.Context) error
+	SignupEmploye(c echo.Context) error
+	ChangePasswordAdmin(c echo.Context) error
+	ChangePasswordUser(c echo.Context) error
 }
 
 type authenticationController struct {
@@ -39,7 +46,6 @@ func (as *authenticationController) LoginUser(c echo.Context) error {
 
 	email := c.FormValue("email")
 	password := c.FormValue("password")
-	fmt.Println(email, password)
 
 	cookie, statusCode := as.service.LoginUser(email, password, response)
 	if statusCode != 200 {
@@ -87,7 +93,7 @@ func (as *authenticationController) SignupUser(c echo.Context) error {
 // @Failure 400 {object} ResponseErrorBadRequest "Invalid or missing verification code"
 // @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
-// @Router /signup/verification [post]
+// @Router /signup/user/verification [post]
 func (as *authenticationController) SignupUserVerification(c echo.Context) error {
 	response := make(map[string]interface{})
 
@@ -103,3 +109,93 @@ func (as *authenticationController) SignupUserVerification(c echo.Context) error
 	return c.JSON(StatusCode, response)
 }
 
+func (as *authenticationController) LoginAdmin(c echo.Context) error {
+	response := make(map[string]interface{})
+
+	email := c.FormValue("email")
+	password := c.FormValue("password")
+
+	cookieAdmin, cookieOwner, statusCode := as.service.LoginAdmin(email, password, response)
+	if statusCode != 200 {
+		return c.JSON(statusCode, response)
+	}
+
+	if cookieOwner == nil {
+		c.SetCookie(cookieAdmin)
+	} else {
+		c.SetCookie(cookieAdmin)
+		c.SetCookie(cookieOwner)
+	}
+
+	return c.JSON(statusCode, response)
+}
+
+func (as *authenticationController) SignupEmploye(c echo.Context) error {
+	response := make(map[string]interface{})
+
+	file, fileHeader, Ext, filetype, statusCode := controller.GetFileFromForm(c, response)
+	if statusCode != 200 {
+		return c.JSON(statusCode, response)
+	}
+
+	data := dto.Employee{
+		Name:            c.FormValue("name"),
+		Email:           c.FormValue("email"),
+		Whatsapp:        c.FormValue("whatsapp"),
+		Password:        os.Getenv("AUTO_PASSWORD_SIGNUP"),
+		Position:        c.FormValue("position"),
+		EmployementType: c.FormValue("employementType"),
+		DateOfBirth:     c.FormValue("dateOfBirth"),
+		Gender:          c.FormValue("gender"),
+		Address:         c.FormValue("address"),
+		Image:           fileHeader.Filename,
+		FileSize:        uint(fileHeader.Size),
+		Ext:             Ext,
+		ImageType:       filetype,
+	}
+
+	StatusCode := as.service.SignupEmploye(file, fileHeader, &data, response)
+
+	return c.JSON(StatusCode, response)
+}
+
+func (as *authenticationController) ChangePasswordAdmin(c echo.Context) error {
+	response := make(map[string]interface{})
+
+	claims, ok := c.Get("admin_claims").(*config.JWTClaim)
+	if !ok {
+		response["error"] = "Unable to retrieve claims"
+		return c.JSON(http.StatusUnauthorized, response)
+	}
+
+	data := &dto.ChangePassword{
+		Id : claims.Id,
+		PasswordBefore: c.FormValue("passwordBefore"),
+		Password : c.FormValue("password"),
+	}
+
+	statusCode := as.service.ChangePasswordAdmin(data, response)
+
+	return c.JSON(statusCode, response)
+}
+
+func (as *authenticationController) ChangePasswordUser(c echo.Context) error {
+	response := make(map[string]interface{})
+
+	claims, ok := c.Get("user_claims").(*config.JWTClaim)
+	if !ok {
+		response["error"] = "Unable to retrieve claims"
+		return c.JSON(http.StatusUnauthorized, response)
+	}
+
+	data := &dto.ChangePassword{
+		Id: claims.Id,
+		PasswordBefore: c.FormValue("passwordBefore"),
+		Password: c.FormValue("password"),
+	}
+
+	statusCode := as.service.ChangePasswordUser(data, response)
+
+	return c.JSON(statusCode, response)
+}
+ 

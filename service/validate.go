@@ -57,6 +57,50 @@ func ValidateStructRegister(data *dto.RegisterUser, response map[string]interfac
 	return nil
 }
 
+func ValidateStructEmployee(data *dto.Employee, response map[string]interface{}) error {
+	trans := validation.TranslatorIDN()
+	validate := validator.New()
+	validation.RegisterCustomValidationsProduct(validate, trans)
+
+	if err := validate.Struct(data); err != nil {
+		var errsMessage []map[string]string
+		for _, err := range err.(validator.ValidationErrors) {
+			errField := err.StructField()
+			errTranslate := err.Translate(trans)
+			errs := map[string]string{
+				errField: errTranslate,
+			}
+			errsMessage = append(errsMessage, errs)
+		}
+		response["ErrorField"] = errsMessage
+		return err
+	}
+
+	return nil
+}
+
+func ValidateStructChangePassword(data *dto.ChangePassword, response map[string]interface{}) error {
+	trans := validation.TranslatorIDN()
+	validate := validator.New()
+	validation.RegisterCustomValidationsProduct(validate, trans)
+
+	if err := validate.Struct(data); err != nil {
+		var errsMessage []map[string]string
+		for _, err := range err.(validator.ValidationErrors) {
+			errField := err.StructField()
+			errTranslate := err.Translate(trans)
+			errs := map[string]string{
+				errField: errTranslate,
+			}
+			errsMessage = append(errsMessage, errs)
+		}
+		response["ErrorField"] = errsMessage
+		return err
+	}
+
+	return nil
+}
+
 func ValidateFileExtention(fileHeader *multipart.FileHeader) (string, error) {
 	ext := filepath.Ext(fileHeader.Filename) // extention file image
 	if ext != ".jpg" && ext != ".png" && ext != ".gift" {
@@ -72,7 +116,7 @@ func ValidateFileSize(fileHeader *multipart.FileHeader) error {
 	return nil
 }
 
-func ValidateLoginUser(email string, password string, response *map[string]string) error {
+func ValidateLogin(email string, password string, response *map[string]string) error {
 	if email == "" {
 		(*response)["email"] = "email tidak boleh kosong"
 	} else if password == "" {

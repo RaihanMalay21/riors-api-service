@@ -307,7 +307,7 @@ func (ar *authenticationService) ChangePasswordAdmin(data *dto.ChangePassword, r
 	// 	}
 	// }
 
-	if Employee.Password != data.Password {
+	if Employee.Password != data.PasswordBefore {
 		response["errorField"] = "password salah"
 		return http.StatusBadRequest
 	}

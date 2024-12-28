@@ -184,16 +184,21 @@ func (ar *authenticationService) LoginAdmin(email string, password string, respo
 		return nil, nil, http.StatusInternalServerError
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(employee.Password), []byte(password)); err != nil {
-		switch err {
-		case bcrypt.ErrMismatchedHashAndPassword:
-			res["password"] = "Password anda salah"
-			response["ErrorFields"] = res
-			return nil, nil, http.StatusBadRequest
-		default:
-			response["error"] = err.Error()
-			return nil, nil, http.StatusInternalServerError
-		}
+	// if err := bcrypt.CompareHashAndPassword([]byte(employee.Password), []byte(password)); err != nil {
+	// 	switch err {
+	// 	case bcrypt.ErrMismatchedHashAndPassword:
+	// 		res["password"] = "Password anda salah"
+	// 		response["ErrorFields"] = res
+	// 		return nil, nil, http.StatusBadRequest
+	// 	default:
+	// 		response["error"] = err.Error()
+	// 		return nil, nil, http.StatusInternalServerError
+	// 	}
+	// }
+
+	if employee.Password != password {
+		response["errorField"] = "password salah"
+		return nil, nil, http.StatusBadRequest
 	}
 
 	expToken := time.Now().Add(2 * time.Hour)
@@ -300,6 +305,11 @@ func (ar *authenticationService) ChangePasswordAdmin(data *dto.ChangePassword, r
 			response["error"] = err.Error()
 			return http.StatusInternalServerError
 		}
+	}
+
+	if Employee.Password != data.PasswordBefore {
+		response["errorField"] = "password salah"
+		return http.StatusBadRequest
 	}
 
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)

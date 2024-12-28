@@ -296,16 +296,16 @@ func (ar *authenticationService) ChangePasswordAdmin(data *dto.ChangePassword, r
 		return http.StatusInternalServerError
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(Employee.Password), []byte(data.PasswordBefore)); err != nil {
-		switch err {
-		case bcrypt.ErrMismatchedHashAndPassword:
-			response["ErrorFields"] = map[string]string{"password": "Password anda salah"}
-			return http.StatusBadRequest
-		default:
-			response["error"] = err.Error()
-			return http.StatusInternalServerError
-		}
-	}
+	// if err := bcrypt.CompareHashAndPassword([]byte(Employee.Password), []byte(data.PasswordBefore)); err != nil {
+	// 	switch err {
+	// 	case bcrypt.ErrMismatchedHashAndPassword:
+	// 		response["ErrorFields"] = map[string]string{"password": "Password anda salah"}
+	// 		return http.StatusBadRequest
+	// 	default:
+	// 		response["error"] = err.Error()
+	// 		return http.StatusInternalServerError
+	// 	}
+	// }
 
 	if Employee.Password != data.PasswordBefore {
 		response["errorField"] = "password salah"

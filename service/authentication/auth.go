@@ -184,21 +184,16 @@ func (ar *authenticationService) LoginAdmin(email string, password string, respo
 		return nil, nil, http.StatusInternalServerError
 	}
 
-	// if err := bcrypt.CompareHashAndPassword([]byte(employee.Password), []byte(password)); err != nil {
-	// 	switch err {
-	// 	case bcrypt.ErrMismatchedHashAndPassword:
-	// 		res["password"] = "Password anda salah"
-	// 		response["ErrorFields"] = res
-	// 		return nil, nil, http.StatusBadRequest
-	// 	default:
-	// 		response["error"] = err.Error()
-	// 		return nil, nil, http.StatusInternalServerError
-	// 	}
-	// }
-
-	if employee.Password != password {
-		response["errorField"] = "password salah"
-		return nil, nil, http.StatusBadRequest
+	if err := bcrypt.CompareHashAndPassword([]byte(employee.Password), []byte(password)); err != nil {
+		switch err {
+		case bcrypt.ErrMismatchedHashAndPassword:
+			res["password"] = "Password anda salah"
+			response["ErrorFields"] = res
+			return nil, nil, http.StatusBadRequest
+		default:
+			response["error"] = err.Error()
+			return nil, nil, http.StatusInternalServerError
+		}
 	}
 
 	expToken := time.Now().Add(2 * time.Hour)
@@ -296,20 +291,15 @@ func (ar *authenticationService) ChangePasswordAdmin(data *dto.ChangePassword, r
 		return http.StatusInternalServerError
 	}
 
-	// if err := bcrypt.CompareHashAndPassword([]byte(Employee.Password), []byte(data.PasswordBefore)); err != nil {
-	// 	switch err {
-	// 	case bcrypt.ErrMismatchedHashAndPassword:
-	// 		response["ErrorFields"] = map[string]string{"password": "Password anda salah"}
-	// 		return http.StatusBadRequest
-	// 	default:
-	// 		response["error"] = err.Error()
-	// 		return http.StatusInternalServerError
-	// 	}
-	// }
-
-	if Employee.Password != data.PasswordBefore {
-		response["errorField"] = "password salah"
-		return http.StatusBadRequest
+	if err := bcrypt.CompareHashAndPassword([]byte(Employee.Password), []byte(data.PasswordBefore)); err != nil {
+		switch err {
+		case bcrypt.ErrMismatchedHashAndPassword:
+			response["ErrorFields"] = map[string]string{"password": "Password anda salah"}
+			return http.StatusBadRequest
+		default:
+			response["error"] = err.Error()
+			return http.StatusInternalServerError
+		}
 	}
 
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)

@@ -27,10 +27,11 @@ func InitRouter(
 	e.GET("/product/male", product.GetAllMale)
 
 	// authentication
-	e.POST("/login/user", auth.LoginUser)
-	e.POST("/login/admin", auth.LoginAdmin)
-	e.POST("/signup/user", auth.SignupUser)
-	e.POST("/signup/user/verification", auth.SignupUserVerification) // access with token register_riors_token
+	protectedAuthentication := e.Group("authentication")
+	protectedAuthentication.POST("/login/user", auth.LoginUser)
+	protectedAuthentication.POST("/login/admin", auth.LoginAdmin)
+	protectedAuthentication.POST("/signup/user", auth.SignupUser)
+	protectedAuthentication.POST("/signup/user/verification", auth.SignupUserVerification) // access with token register_riors_token
 
 	// user access with token user_riors_token
 	protectedUser := e.Group("/user")
@@ -40,12 +41,12 @@ func InitRouter(
 	// admin access with token admin_riors_token
 	protectedAdmin := e.Group("/admin")
 	protectedAdmin.Use(middlewares.ArmorAdmin)
-	protectedAdmin.PATCH("/change/password", auth.ChangePasswordAdmin) 
+	protectedAdmin.PATCH("/change/password", auth.ChangePasswordAdmin)
 	protectedAdmin.POST("/category", category.InputCategory)
 	protectedAdmin.POST("/product", product.InputProduct)
 
 	// owner access with token owner_riors_token based on position employee
-	protectedOwner := e.Group("/admin/owner")
+	protectedOwner := protectedAdmin.Group("/owner")
 	protectedOwner.Use(middlewares.ArmorOwner)
 	protectedOwner.POST("/register/employe", auth.SignupEmploye)
 

@@ -31,7 +31,7 @@ func ConstructorAuthenticationController(service service.AuthenticationService) 
 	return &authenticationController{service: service}
 }
 
-// @summary User Login
+// @summary User login
 // @Description This enpoint is used to authenticate users with send cridential data (email dan password).
 // @Tags authentication
 // @accept  application/x-www-form-urlencoded
@@ -40,7 +40,7 @@ func ConstructorAuthenticationController(service service.AuthenticationService) 
 // @Success 200  {object}  ResponseSuccess "Successfuly login, return a token to access enpoint for user"
 // @Failure 400  {object}  ResponseErrorBadRequest "Request invalid or the data sent is incorrect"
 // @Failure 500  {object}  ResponseErrorInternalServer "Mistake in the server"
-// @Router /login/user [post]
+// @Router /authentication/login/user [post]
 func (as *authenticationController) LoginUser(c echo.Context) error {
 	response := make(map[string]interface{})
 
@@ -65,7 +65,7 @@ func (as *authenticationController) LoginUser(c echo.Context) error {
 // @Success 200 {object} ResponseSuccess "Account successfully created temporery, return a token to verification email"
 // @Failure 400 {object} ResponseErrorBadRequest "Invalid request or incomplete data"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
-// @Router /signup/user [post]
+// @Router /authentication/signup/user [post]
 func (as *authenticationController) SignupUser(c echo.Context) error {
 	response := make(map[string]interface{})
 	register := new(dto.RegisterUser)
@@ -86,6 +86,7 @@ func (as *authenticationController) SignupUser(c echo.Context) error {
 // @summary Verify User Email for Signup
 // @Description This endpoint is used to verify the user's email during the registration process. A verification code is sent to the user's email, and the user must input this code to complete the signup process successfully. The request must include the verification code in the form body.
 // @Tags authentication
+// @Security BearerAuth
 // @Accept application/x-www-form-urlencoded
 // @Produce application/json
 // @Param Signup body Verification true "Email Verification Data (code)"
@@ -93,7 +94,7 @@ func (as *authenticationController) SignupUser(c echo.Context) error {
 // @Failure 400 {object} ResponseErrorBadRequest "Invalid or missing verification code"
 // @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
-// @Router /signup/user/verification [post]
+// @Router /authentication/signup/user/verification [post]
 func (as *authenticationController) SignupUserVerification(c echo.Context) error {
 	response := make(map[string]interface{})
 
@@ -109,6 +110,17 @@ func (as *authenticationController) SignupUserVerification(c echo.Context) error
 	return c.JSON(StatusCode, response)
 }
 
+// @summary Admin login
+// @Description This endpoint is used to login by email and password.
+// @Tags authentication
+// @Accept application/x-www-form-urlencoded
+// @Produce application/json
+// @Param Login body RegisterUser true "login data"
+// @Success 200 {object} ResponseSuccess "user successfully login"
+// @Failure 400 {object} ResponseErrorBadRequest "Invalid or missing"
+// @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
+// @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
+// @Router /authentication/login/admin [post]
 func (as *authenticationController) LoginAdmin(c echo.Context) error {
 	response := make(map[string]interface{})
 
@@ -130,6 +142,21 @@ func (as *authenticationController) LoginAdmin(c echo.Context) error {
 	return c.JSON(statusCode, response)
 }
 
+// @summary signup for admin side
+// @Description This endpoint is used to register new employee to access admin side.
+// @Tags admin
+// @Security BearerAuth
+// @Accept multipart/form-data
+// @Produce application/json
+// @Param Signup body SignupEmploye true "Signup data"
+// @Param employementType formData string true "Employment Type (Tetap, Kontrak, Freelance)" Enums(Tetap, Kontrak, Freelance)
+// @Param gender formData string true "Gender (Man, Woman)" Enums(Man, Woman)
+// @Param position formData string true "Position (Staff, Owner)" Enums(Staff, Owner)
+// @Success 200 {object} ResponseSuccess "successfuly register employee"
+// @Failure 400 {object} ResponseErrorBadRequest "Invalid or missing data"
+// @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
+// @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
+// @Router /admin/owner/register/employe [post]
 func (as *authenticationController) SignupEmploye(c echo.Context) error {
 	response := make(map[string]interface{})
 
@@ -159,6 +186,18 @@ func (as *authenticationController) SignupEmploye(c echo.Context) error {
 	return c.JSON(StatusCode, response)
 }
 
+// @summary change password admin
+// @Description This endpoint is used to change password in admin side.
+// @Tags admin
+// @Security BearerAuth
+// @Accept x-www-form-urlencoded
+// @Produce application/json
+// @Param ChangePassword body ChangePassword true "Change password data"
+// @Success 200 {object} ResponseSuccess "successfuly change password
+// @Failure 400 {object} ResponseErrorBadRequest "Invalid or missing data"
+// @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
+// @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
+// @Router /admin/change/password [patch]
 func (as *authenticationController) ChangePasswordAdmin(c echo.Context) error {
 	response := make(map[string]interface{})
 
@@ -169,9 +208,9 @@ func (as *authenticationController) ChangePasswordAdmin(c echo.Context) error {
 	}
 
 	data := &dto.ChangePassword{
-		Id : claims.Id,
+		Id:             claims.Id,
 		PasswordBefore: c.FormValue("passwordBefore"),
-		Password : c.FormValue("password"),
+		Password:       c.FormValue("password"),
 	}
 
 	statusCode := as.service.ChangePasswordAdmin(data, response)
@@ -179,6 +218,18 @@ func (as *authenticationController) ChangePasswordAdmin(c echo.Context) error {
 	return c.JSON(statusCode, response)
 }
 
+// @summary change password user
+// @Description This endpoint is used to change password in client side or user.
+// @Tags user
+// @Accept x-www-form-urlencoded
+// @Security BearerAuth
+// @Produce application/json
+// @Param ChangePassword body ChangePassword true "Change password data"
+// @Success 200 {object} ResponseSuccess "successfuly change password
+// @Failure 400 {object} ResponseErrorBadRequest "Invalid or missing data"
+// @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
+// @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
+// @Router /user/change/password [patch]
 func (as *authenticationController) ChangePasswordUser(c echo.Context) error {
 	response := make(map[string]interface{})
 
@@ -189,13 +240,12 @@ func (as *authenticationController) ChangePasswordUser(c echo.Context) error {
 	}
 
 	data := &dto.ChangePassword{
-		Id: claims.Id,
+		Id:             claims.Id,
 		PasswordBefore: c.FormValue("passwordBefore"),
-		Password: c.FormValue("password"),
+		Password:       c.FormValue("password"),
 	}
 
 	statusCode := as.service.ChangePasswordUser(data, response)
 
 	return c.JSON(statusCode, response)
 }
- 

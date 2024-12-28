@@ -1,4 +1,11 @@
 definitions:
+  authentication.ChangePassword:
+    properties:
+      password:
+        type: string
+      passwordBefore:
+        type: string
+    type: object
   authentication.RegisterUser:
     properties:
       email:
@@ -30,6 +37,27 @@ definitions:
       success:
         type: string
     type: object
+  authentication.SignupEmploye:
+    properties:
+      address:
+        type: string
+      dateOfBirth:
+        type: string
+      email:
+        type: string
+      employementType:
+        type: string
+      gender:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      position:
+        type: string
+      whatsapp:
+        type: string
+    type: object
   authentication.Verification:
     properties:
       code:
@@ -56,6 +84,8 @@ definitions:
     type: object
   products.ProductInput:
     properties:
+      categoryGender:
+        type: string
       categoryId:
         type: integer
       hargaProduct:
@@ -115,31 +145,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /category:
-    get:
-      description: Get detailed information of all data category and product based
-        on category
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved list of categories with details
-          schema:
-            items:
-              $ref: '#/definitions/dto.Category'
-            type: array
-        "404":
-          description: No categories found
-          schema:
-            $ref: '#/definitions/products.ResponseErrorNotFound'
-        "500":
-          description: Internal server error while processing the request
-          schema:
-            $ref: '#/definitions/products.ResponseErrorInternalServer'
-      summary: Get All Data Category
-      tags:
-      - Category
-  /category/input:
+  /admin/category:
     post:
       consumes:
       - application/x-www-form-urlencoded
@@ -166,10 +172,185 @@ paths:
           description: Internal server error while processing the request
           schema:
             $ref: '#/definitions/products.ResponseErrorInternalServer'
-      summary: post data Category
+      security:
+      - BearerAuth: []
+      summary: Add data Category
       tags:
-      - Category
-  /login/user:
+      - admin
+  /admin/change/password:
+    patch:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: This endpoint is used to change password in admin side.
+      parameters:
+      - description: Change password data
+        in: body
+        name: ChangePassword
+        required: true
+        schema:
+          $ref: '#/definitions/authentication.ChangePassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfuly change password
+          schema:
+            $ref: '#/definitions/authentication.ResponseSuccess'
+        "400":
+          description: Invalid or missing data
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorBadRequest'
+        "401":
+          description: Unauthorized - Missing or invalid token
+          schema:
+            $ref: '#/definitions/authentication.ResponsAuthorization'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorInternalServer'
+      security:
+      - BearerAuth: []
+      summary: change password admin
+      tags:
+      - admin
+  /admin/owner/register/employe:
+    post:
+      consumes:
+      - multipart/form-data
+      description: This endpoint is used to register new employee to access admin
+        side.
+      parameters:
+      - description: Signup data
+        in: body
+        name: Signup
+        required: true
+        schema:
+          $ref: '#/definitions/authentication.SignupEmploye'
+      - description: Employment Type (Tetap, Kontrak, Freelance)
+        enum:
+        - Tetap
+        - Kontrak
+        - Freelance
+        in: formData
+        name: employementType
+        required: true
+        type: string
+      - description: Gender (Man, Woman)
+        enum:
+        - Man
+        - Woman
+        in: formData
+        name: gender
+        required: true
+        type: string
+      - description: Position (Staff, Owner)
+        enum:
+        - Staff
+        - Owner
+        in: formData
+        name: position
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfuly register employee
+          schema:
+            $ref: '#/definitions/authentication.ResponseSuccess'
+        "400":
+          description: Invalid or missing data
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorBadRequest'
+        "401":
+          description: Unauthorized - Missing or invalid token
+          schema:
+            $ref: '#/definitions/authentication.ResponsAuthorization'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorInternalServer'
+      security:
+      - BearerAuth: []
+      summary: signup for admin side
+      tags:
+      - admin
+  /admin/product:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Add a new Product to the system
+      parameters:
+      - description: Product Input
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/products.ProductInput'
+      - description: Category Gender (Man, Woman, Unisex)
+        enum:
+        - Man
+        - Woman
+        - Unisex
+        in: formData
+        name: categoryGender
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product successfully added to the system
+          schema:
+            $ref: '#/definitions/products.ResponseSuccess'
+        "400":
+          description: Invalid request or incomplete product data
+          schema:
+            $ref: '#/definitions/products.ResponseErrorBadRequest'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
+      security:
+      - BearerAuth: []
+      summary: Add data Product
+      tags:
+      - admin
+  /authentication/login/admin:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: This endpoint is used to login by email and password.
+      parameters:
+      - description: login data
+        in: body
+        name: Login
+        required: true
+        schema:
+          $ref: '#/definitions/authentication.RegisterUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user successfully login
+          schema:
+            $ref: '#/definitions/authentication.ResponseSuccess'
+        "400":
+          description: Invalid or missing
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorBadRequest'
+        "401":
+          description: Unauthorized - Missing or invalid token
+          schema:
+            $ref: '#/definitions/authentication.ResponsAuthorization'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorInternalServer'
+      summary: Admin login
+      tags:
+      - authentication
+  /authentication/login/user:
     post:
       consumes:
       - application/x-www-form-urlencoded
@@ -197,111 +378,10 @@ paths:
           description: Mistake in the server
           schema:
             $ref: '#/definitions/authentication.ResponseErrorInternalServer'
-      summary: User Login
+      summary: User login
       tags:
       - authentication
-  /product:
-    get:
-      description: This endpoint is used to retrieve a list of all products along
-        with detailed information for each product. It also allows you to get the
-        details of a specific product by its ID. The response will include information
-        like product name, description, price, and other relevant details.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved list of products and their details
-          schema:
-            items:
-              $ref: '#/definitions/products.ResponseProduct'
-            type: array
-        "404":
-          description: Products not found
-          schema:
-            $ref: '#/definitions/products.ResponseErrorNotFound'
-        "500":
-          description: Internal server error while processing the request
-          schema:
-            $ref: '#/definitions/products.ResponseErrorInternalServer'
-      summary: Retrieve All Product Data
-      tags:
-      - Product
-    post:
-      consumes:
-      - multipart/form-data
-      description: Add a new Product to the system
-      parameters:
-      - description: Product Input
-        in: body
-        name: category
-        required: true
-        schema:
-          $ref: '#/definitions/products.ProductInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Product successfully added to the system
-          schema:
-            $ref: '#/definitions/products.ResponseSuccess'
-        "400":
-          description: Invalid request or incomplete product data
-          schema:
-            $ref: '#/definitions/products.ResponseErrorBadRequest'
-        "500":
-          description: Internal server error while processing the request
-          schema:
-            $ref: '#/definitions/products.ResponseErrorInternalServer'
-      summary: post data Product
-      tags:
-      - Product
-  /product/female:
-    get:
-      description: Get detailed information of all data Product Female
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved list of female products with details
-          schema:
-            items:
-              $ref: '#/definitions/products.ResponseProduct'
-            type: array
-        "404":
-          description: No female products found
-          schema:
-            $ref: '#/definitions/products.ResponseErrorNotFound'
-        "500":
-          description: Internal server error while processing the request
-          schema:
-            $ref: '#/definitions/products.ResponseErrorInternalServer'
-      summary: Get All Data Product Female
-      tags:
-      - Product
-  /product/male:
-    get:
-      description: Get detailed information of all data Product Male
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved list of male products with details
-          schema:
-            items:
-              $ref: '#/definitions/products.ResponseProduct'
-            type: array
-        "404":
-          description: No male products found
-          schema:
-            $ref: '#/definitions/products.ResponseErrorNotFound'
-        "500":
-          description: Internal server error while processing the request
-          schema:
-            $ref: '#/definitions/products.ResponseErrorInternalServer'
-      summary: Get All Data Product Male
-      tags:
-      - Product
-  /signup/user:
+  /authentication/signup/user:
     post:
       consumes:
       - application/json
@@ -336,7 +416,7 @@ paths:
       summary: Create New User Account
       tags:
       - authentication
-  /signup/verification:
+  /authentication/signup/user/verification:
     post:
       consumes:
       - application/x-www-form-urlencoded
@@ -370,7 +450,141 @@ paths:
           description: Internal server error while processing the request
           schema:
             $ref: '#/definitions/authentication.ResponseErrorInternalServer'
+      security:
+      - BearerAuth: []
       summary: Verify User Email for Signup
       tags:
       - authentication
+  /category:
+    get:
+      description: Get detailed information of all data category and product based
+        on category
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved list of categories with details
+          schema:
+            items:
+              $ref: '#/definitions/dto.Category'
+            type: array
+        "404":
+          description: No categories found
+          schema:
+            $ref: '#/definitions/products.ResponseErrorNotFound'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
+      summary: Get All Data Category
+      tags:
+      - category
+  /product:
+    get:
+      description: This endpoint is used to retrieve a list of all products along
+        with detailed information for each product. It also allows you to get the
+        details of a specific product by its ID. The response will include information
+        like product name, description, price, and other relevant details.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved list of products and their details
+          schema:
+            items:
+              $ref: '#/definitions/products.ResponseProduct'
+            type: array
+        "404":
+          description: Products not found
+          schema:
+            $ref: '#/definitions/products.ResponseErrorNotFound'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
+      summary: Retrieve All Product Data
+      tags:
+      - product
+  /product/female:
+    get:
+      description: Get detailed information of all data Product Female
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved list of female products with details
+          schema:
+            items:
+              $ref: '#/definitions/products.ResponseProduct'
+            type: array
+        "404":
+          description: No female products found
+          schema:
+            $ref: '#/definitions/products.ResponseErrorNotFound'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
+      summary: Get All Data Product Female
+      tags:
+      - product
+  /product/male:
+    get:
+      description: Get detailed information of all data Product Male
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved list of male products with details
+          schema:
+            items:
+              $ref: '#/definitions/products.ResponseProduct'
+            type: array
+        "404":
+          description: No male products found
+          schema:
+            $ref: '#/definitions/products.ResponseErrorNotFound'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/products.ResponseErrorInternalServer'
+      summary: Get All Data Product Male
+      tags:
+      - product
+  /user/change/password:
+    patch:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: This endpoint is used to change password in client side or user.
+      parameters:
+      - description: Change password data
+        in: body
+        name: ChangePassword
+        required: true
+        schema:
+          $ref: '#/definitions/authentication.ChangePassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successfuly change password
+          schema:
+            $ref: '#/definitions/authentication.ResponseSuccess'
+        "400":
+          description: Invalid or missing data
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorBadRequest'
+        "401":
+          description: Unauthorized - Missing or invalid token
+          schema:
+            $ref: '#/definitions/authentication.ResponsAuthorization'
+        "500":
+          description: Internal server error while processing the request
+          schema:
+            $ref: '#/definitions/authentication.ResponseErrorInternalServer'
+      security:
+      - BearerAuth: []
+      summary: change password user
+      tags:
+      - user
 swagger: "2.0"

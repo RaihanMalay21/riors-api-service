@@ -23,7 +23,7 @@ func ConstructorCategoryController(service service.CategoryService) CategoryCont
 
 // @summary Get All Data Category
 // @Description Get detailed information of all data category and product based on category
-// @Tags Category
+// @Tags category
 // @Produce  application/json
 // @Success 200 {object} []dto.Category "Successfully retrieved list of categories with details"
 // @Failure 404 {object} ResponseErrorNotFound "No categories found"
@@ -38,16 +38,17 @@ func (cs *categoryController) GetAllCategory(e echo.Context) error {
 	return e.JSON(statusCode, data)
 }
 
-// @summary post data Category
+// @summary Add data Category
 // @Description Add a new category to the system
-// @Tags Category
+// @Tags admin
+// @Security BearerAuth
 // @accept  application/x-www-form-urlencoded
 // @produce  application/json
 // @Param category body CategoryInput true "Category Input"
 // @Success 200 {object} ResponseSuccess "Category successfully added to the system"
 // @Failure 400 {object} ResponseErrorBadRequest "Invalid request or incomplete category data"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
-// @Router /category/input [post]
+// @Router /admin/category [post]
 func (cs *categoryController) InputCategory(e echo.Context) error {
 	var response = make(map[string]interface{})
 

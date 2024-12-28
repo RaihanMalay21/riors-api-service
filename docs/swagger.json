@@ -4,43 +4,13 @@
         "contact": {}
     },
     "paths": {
-        "/category": {
-            "get": {
-                "description": "Get detailed information of all data category and product based on category",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Category"
-                ],
-                "summary": "Get All Data Category",
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved list of categories with details",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.Category"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No categories found",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseErrorNotFound"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error while processing the request",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
-                        }
-                    }
-                }
-            }
-        },
-        "/category/input": {
+        "/admin/category": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Add a new category to the system",
                 "consumes": [
                     "application/x-www-form-urlencoded"
@@ -49,9 +19,9 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Category"
+                    "admin"
                 ],
-                "summary": "post data Category",
+                "summary": "Add data Category",
                 "parameters": [
                     {
                         "description": "Category Input",
@@ -85,7 +55,270 @@
                 }
             }
         },
-        "/login/user": {
+        "/admin/change/password": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "This endpoint is used to change password in admin side.",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "change password admin",
+                "parameters": [
+                    {
+                        "description": "Change password data",
+                        "name": "ChangePassword",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ChangePassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfuly change password",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseSuccess"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or missing data",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorBadRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Missing or invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponsAuthorization"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/owner/register/employe": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "This endpoint is used to register new employee to access admin side.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "signup for admin side",
+                "parameters": [
+                    {
+                        "description": "Signup data",
+                        "name": "Signup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authentication.SignupEmploye"
+                        }
+                    },
+                    {
+                        "enum": [
+                            "Tetap",
+                            "Kontrak",
+                            "Freelance"
+                        ],
+                        "type": "string",
+                        "description": "Employment Type (Tetap, Kontrak, Freelance)",
+                        "name": "employementType",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "Man",
+                            "Woman"
+                        ],
+                        "type": "string",
+                        "description": "Gender (Man, Woman)",
+                        "name": "gender",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "Staff",
+                            "Owner"
+                        ],
+                        "type": "string",
+                        "description": "Position (Staff, Owner)",
+                        "name": "position",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfuly register employee",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseSuccess"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or missing data",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorBadRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Missing or invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponsAuthorization"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/product": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Add a new Product to the system",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Add data Product",
+                "parameters": [
+                    {
+                        "description": "Product Input",
+                        "name": "category",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/products.ProductInput"
+                        }
+                    },
+                    {
+                        "enum": [
+                            "Man",
+                            "Woman",
+                            "Unisex"
+                        ],
+                        "type": "string",
+                        "description": "Category Gender (Man, Woman, Unisex)",
+                        "name": "categoryGender",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product successfully added to the system",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseSuccess"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or incomplete product data",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/authentication/login/admin": {
+            "post": {
+                "description": "This endpoint is used to login by email and password.",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Admin login",
+                "parameters": [
+                    {
+                        "description": "login data",
+                        "name": "Login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authentication.RegisterUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "user successfully login",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseSuccess"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or missing",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorBadRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Missing or invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponsAuthorization"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/authentication/login/user": {
             "post": {
                 "description": "This enpoint is used to authenticate users with send cridential data (email dan password).",
                 "consumes": [
@@ -97,7 +330,7 @@
                 "tags": [
                     "authentication"
                 ],
-                "summary": "User Login",
+                "summary": "User login",
                 "parameters": [
                     {
                         "description": "Login Input",
@@ -131,156 +364,7 @@
                 }
             }
         },
-        "/product": {
-            "get": {
-                "description": "This endpoint is used to retrieve a list of all products along with detailed information for each product. It also allows you to get the details of a specific product by its ID. The response will include information like product name, description, price, and other relevant details.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Product"
-                ],
-                "summary": "Retrieve All Product Data",
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved list of products and their details",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/products.ResponseProduct"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Products not found",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseErrorNotFound"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error while processing the request",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Add a new Product to the system",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Product"
-                ],
-                "summary": "post data Product",
-                "parameters": [
-                    {
-                        "description": "Product Input",
-                        "name": "category",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/products.ProductInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Product successfully added to the system",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseSuccess"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request or incomplete product data",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseErrorBadRequest"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error while processing the request",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
-                        }
-                    }
-                }
-            }
-        },
-        "/product/female": {
-            "get": {
-                "description": "Get detailed information of all data Product Female",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Product"
-                ],
-                "summary": "Get All Data Product Female",
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved list of female products with details",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/products.ResponseProduct"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No female products found",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseErrorNotFound"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error while processing the request",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
-                        }
-                    }
-                }
-            }
-        },
-        "/product/male": {
-            "get": {
-                "description": "Get detailed information of all data Product Male",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Product"
-                ],
-                "summary": "Get All Data Product Male",
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved list of male products with details",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/products.ResponseProduct"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No male products found",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseErrorNotFound"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error while processing the request",
-                        "schema": {
-                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
-                        }
-                    }
-                }
-            }
-        },
-        "/signup/user": {
+        "/authentication/signup/user": {
             "post": {
                 "description": "This endpoint is used to create a new user account by submitting registration data in JSON format. Users are required to provide information email, and password. The data will be validated on the server side before the account is created temporary, client have navigate to endpoint signup verification on the client side.",
                 "consumes": [
@@ -326,8 +410,13 @@
                 }
             }
         },
-        "/signup/verification": {
+        "/authentication/signup/user/verification": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "This endpoint is used to verify the user's email during the registration process. A verification code is sent to the user's email, and the user must input this code to complete the signup process successfully. The request must include the verification code in the form body.",
                 "consumes": [
                     "application/x-www-form-urlencoded"
@@ -377,9 +466,217 @@
                     }
                 }
             }
+        },
+        "/category": {
+            "get": {
+                "description": "Get detailed information of all data category and product based on category",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "Get All Data Category",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved list of categories with details",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.Category"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No categories found",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseErrorNotFound"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/product": {
+            "get": {
+                "description": "This endpoint is used to retrieve a list of all products along with detailed information for each product. It also allows you to get the details of a specific product by its ID. The response will include information like product name, description, price, and other relevant details.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "product"
+                ],
+                "summary": "Retrieve All Product Data",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved list of products and their details",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/products.ResponseProduct"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Products not found",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseErrorNotFound"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/female": {
+            "get": {
+                "description": "Get detailed information of all data Product Female",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "product"
+                ],
+                "summary": "Get All Data Product Female",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved list of female products with details",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/products.ResponseProduct"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No female products found",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseErrorNotFound"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/male": {
+            "get": {
+                "description": "Get detailed information of all data Product Male",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "product"
+                ],
+                "summary": "Get All Data Product Male",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved list of male products with details",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/products.ResponseProduct"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No male products found",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseErrorNotFound"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/products.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/change/password": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "This endpoint is used to change password in client side or user.",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "change password user",
+                "parameters": [
+                    {
+                        "description": "Change password data",
+                        "name": "ChangePassword",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ChangePassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfuly change password",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseSuccess"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or missing data",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorBadRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Missing or invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponsAuthorization"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while processing the request",
+                        "schema": {
+                            "$ref": "#/definitions/authentication.ResponseErrorInternalServer"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "authentication.ChangePassword": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "passwordBefore": {
+                    "type": "string"
+                }
+            }
+        },
         "authentication.RegisterUser": {
             "type": "object",
             "properties": {
@@ -429,6 +726,38 @@
                 }
             }
         },
+        "authentication.SignupEmploye": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "dateOfBirth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "employementType": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "whatsapp": {
+                    "type": "string"
+                }
+            }
+        },
         "authentication.Verification": {
             "type": "object",
             "properties": {
@@ -469,6 +798,9 @@
         "products.ProductInput": {
             "type": "object",
             "properties": {
+                "categoryGender": {
+                    "type": "string"
+                },
                 "categoryId": {
                     "type": "integer"
                 },

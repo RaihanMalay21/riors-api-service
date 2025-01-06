@@ -3,25 +3,29 @@ package products
 import (
 	"strconv"
 
-	helper "github.com/RaihanMalay21/api-service-riors/controller"
+	"github.com/RaihanMalay21/api-service-riors/controller/helper"
 	"github.com/RaihanMalay21/api-service-riors/dto"
-	service "github.com/RaihanMalay21/api-service-riors/service/products"
+	"github.com/RaihanMalay21/api-service-riors/service/products"
 	"github.com/labstack/echo/v4"
 )
 
-type ProductController interface {
-	GetAllProduct(e echo.Context) error
-	InputProduct(e echo.Context) error
-	GetAllMale(e echo.Context) error
-	GetAllFemale(e echo.Context) error
+// type ProductController interface {
+// 	GetAllProduct(e echo.Context) error
+// 	InputProduct(e echo.Context) error
+// 	GetAllMale(e echo.Context) error
+// 	GetAllFemale(e echo.Context) error
+// }
+
+type ProductController struct {
+	service *products.ProductService
+	helper  *helper.HelperController
 }
 
-type productController struct {
-	service service.ProductService
-}
-
-func ConstructorProductController(service service.ProductService) ProductController {
-	return &productController{service: service}
+func ConstructorProductController(service *products.ProductService, helper *helper.HelperController) *ProductController {
+	return &ProductController{
+		service: service,
+		helper:  helper,
+	}
 }
 
 // @summary Retrieve All Product Data
@@ -32,7 +36,7 @@ func ConstructorProductController(service service.ProductService) ProductControl
 // @Failure 404 {object} ResponseErrorNotFound "Products not found"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /product [get]
-func (ps *productController) GetAllProduct(e echo.Context) error {
+func (ps *ProductController) GetAllProduct(e echo.Context) error {
 	data, res, statusCode := ps.service.GetAllProduct()
 	if statusCode != 200 {
 		return e.JSON(statusCode, res)
@@ -53,21 +57,23 @@ func (ps *productController) GetAllProduct(e echo.Context) error {
 // @Failure 400 {object} ResponseErrorBadRequest "Invalid request or incomplete product data"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /admin/product [post]
-func (ps *productController) InputProduct(e echo.Context) error {
+func (ps *ProductController) InputProduct(e echo.Context) error {
 	var response = make(map[string]interface{})
 
-	file, fileHeader, Ext, filetype, statusCode := helper.GetFileFromForm(e, response)
+	file, fileHeader, Ext, filetype, statusCode := ps.helper.GetFileFromForm(e, response)
 	if statusCode != 200 {
 		return e.JSON(statusCode, response)
 	}
 
 	categoryId, _ := strconv.ParseUint(e.FormValue("categoryId"), 10, 32)
-	hargaBarang, _ := strconv.ParseFloat(e.FormValue("hargaProduct"), 64)
+	price, _ := strconv.ParseFloat(e.FormValue("price"), 64)
 
 	data := dto.Product{
 		CategoryId:     uint(categoryId),
-		ProductName:    e.FormValue("namaProduct"),
-		HargaBarang:    hargaBarang,
+		ProductName:    e.FormValue("productName"),
+		Price:          price,
+		DateRelase:     e.FormValue("dateRelase"),
+		Desc:           e.FormValue("desc"),
 		Type:           e.FormValue("typeProduct"),
 		Image:          fileHeader.Filename,
 		CategoryGender: e.FormValue("categoryGender"),
@@ -94,7 +100,7 @@ func (ps *productController) InputProduct(e echo.Context) error {
 // @Failure 404 {object} ResponseErrorNotFound "No male products found"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /product/male [get]
-func (ps *productController) GetAllMale(e echo.Context) error {
+func (ps *ProductController) GetAllMale(e echo.Context) error {
 	data, res, statusCode := ps.service.GetAllProductMale()
 	if statusCode != 200 {
 		return e.JSON(statusCode, res)
@@ -111,7 +117,7 @@ func (ps *productController) GetAllMale(e echo.Context) error {
 // @Failure 404 {object} ResponseErrorNotFound "No female products found"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /product/female [get]
-func (ps *productController) GetAllFemale(e echo.Context) error {
+func (ps *ProductController) GetAllFemale(e echo.Context) error {
 	data, res, statusCode := ps.service.GetAllProductFemale()
 	if statusCode != 200 {
 		return e.JSON(statusCode, res)

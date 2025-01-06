@@ -7,7 +7,7 @@ import (
 
 func TestAuth(t *testing.T) {
 	response := make(map[string]interface{})
-	authentication := &authenticationService{}
+	authentication := &AuthenticationService{}
 
 	cookie, status := authentication.LoginUser("rcndonvpifvf", "jgufvoufh", response)
 

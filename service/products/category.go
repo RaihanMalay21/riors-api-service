@@ -6,24 +6,27 @@ import (
 	"github.com/RaihanMalay21/api-service-riors/dto"
 	"github.com/RaihanMalay21/api-service-riors/mapper"
 	repository "github.com/RaihanMalay21/api-service-riors/repository/products"
+	"github.com/RaihanMalay21/api-service-riors/service/helper"
+	"github.com/RaihanMalay21/api-service-riors/service/validate"
 	"github.com/RaihanMalay21/api-service-riors/validation"
 	"github.com/go-playground/validator/v10"
 )
 
-type CategoryService interface {
-	GetAllCategory() (*[]dto.Category, map[string]string, int)
-	InputCategory(data *dto.Category, response map[string]interface{}) int
+type CategoryService struct {
+	repo     *repository.CategoryRepository
+	helper   *helper.HelperService
+	validate *validate.ValidateService
 }
 
-type categoryService struct {
-	repo repository.CategoryRepository
+func ConstructorCategoryService(repo *repository.CategoryRepository, helper *helper.HelperService, validate *validate.ValidateService) *CategoryService {
+	return &CategoryService{
+		repo:     repo,
+		helper:   helper,
+		validate: validate,
+	}
 }
 
-func ConstructorCategoryService(repo repository.CategoryRepository) CategoryService {
-	return &categoryService{repo: repo}
-}
-
-func (rc *categoryService) GetAllCategory() (*[]dto.Category, map[string]string, int) {
+func (rc *CategoryService) GetAllCategory() (*[]dto.Category, map[string]string, int) {
 	data, err := rc.repo.GetAll()
 	if err != nil {
 		response := map[string]string{"error": "Internal Server encountered an Error"}
@@ -35,7 +38,7 @@ func (rc *categoryService) GetAllCategory() (*[]dto.Category, map[string]string,
 	return dataDto, nil, http.StatusOK
 }
 
-func (rc *categoryService) InputCategory(data *dto.Category, response map[string]interface{}) int {
+func (rc *CategoryService) InputCategory(data *dto.Category, response map[string]interface{}) int {
 	trans := validation.TranslatorIDN()
 	validate := validator.New()
 

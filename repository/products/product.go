@@ -5,28 +5,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type ProductRepository interface {
-	NewTransactionProduct() *gorm.DB
-	GetAll() (*[]domain.Product, error)
-	Create(tx *gorm.DB, data *domain.Product) error
-	UpdateProductImage(tx *gorm.DB, data *domain.Product) error
-	GetAllMale() (*[]domain.Product, error)
-	GetAllFemale() (*[]domain.Product, error)
-}
-
-type productRepository struct {
+type ProductRepository struct {
 	db *gorm.DB
 }
 
-func ConstructorProductRepository(db *gorm.DB) ProductRepository {
-	return &productRepository{db: db}
+func ConstructorProductRepository(db *gorm.DB) *ProductRepository {
+	return &ProductRepository{db: db}
 }
 
-func (dp *productRepository) NewTransactionProduct() *gorm.DB {
+func (dp *ProductRepository) NewTransactionProduct() *gorm.DB {
 	return dp.db.Begin()
 }
 
-func (dp *productRepository) GetAll() (*[]domain.Product, error) {
+func (dp *ProductRepository) GetAll() (*[]domain.Product, error) {
 	var data []domain.Product
 
 	if err := dp.db.Find(&data).Error; err != nil {
@@ -36,7 +27,7 @@ func (dp *productRepository) GetAll() (*[]domain.Product, error) {
 	return &data, nil
 }
 
-func (dp *productRepository) Create(tx *gorm.DB, data *domain.Product) error {
+func (dp *ProductRepository) Create(tx *gorm.DB, data *domain.Product) error {
 	if err := tx.Create(data).Error; err != nil {
 		return err
 	}
@@ -44,7 +35,7 @@ func (dp *productRepository) Create(tx *gorm.DB, data *domain.Product) error {
 	return nil
 }
 
-func (dp *productRepository) UpdateProductImage(tx *gorm.DB, data *domain.Product) error {
+func (dp *ProductRepository) UpdateProductImage(tx *gorm.DB, data *domain.Product) error {
 	if err := tx.Model(data).Update("image", data.Image).Error; err != nil {
 		return err
 	}
@@ -54,7 +45,7 @@ func (dp *productRepository) UpdateProductImage(tx *gorm.DB, data *domain.Produc
 
 // Get Product by gender
 
-func (dp *productRepository) GetAllMale() (*[]domain.Product, error) {
+func (dp *ProductRepository) GetAllMale() (*[]domain.Product, error) {
 	var data []domain.Product
 
 	if err := dp.db.Where("category_gender = ?", "Man").Find(&data).Error; err != nil {
@@ -64,7 +55,7 @@ func (dp *productRepository) GetAllMale() (*[]domain.Product, error) {
 	return &data, nil
 }
 
-func (dp *productRepository) GetAllFemale() (*[]domain.Product, error) {
+func (dp *ProductRepository) GetAllFemale() (*[]domain.Product, error) {
 	var data []domain.Product
 
 	if err := dp.db.Where("category_gender = ?", "Woman").Find(&data).Error; err != nil {

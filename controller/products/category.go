@@ -1,24 +1,23 @@
 package products
 
 import (
+	"github.com/RaihanMalay21/api-service-riors/controller/helper"
 	_ "github.com/RaihanMalay21/api-service-riors/docs"
 	"github.com/RaihanMalay21/api-service-riors/dto"
-	service "github.com/RaihanMalay21/api-service-riors/service/products"
-
+	"github.com/RaihanMalay21/api-service-riors/service/products"
 	"github.com/labstack/echo/v4"
 )
 
-type CategoryController interface {
-	GetAllCategory(e echo.Context) error
-	InputCategory(e echo.Context) error
+type CategoryController struct {
+	service *products.CategoryService
+	helper  *helper.HelperController
 }
 
-type categoryController struct {
-	service service.CategoryService
-}
-
-func ConstructorCategoryController(service service.CategoryService) CategoryController {
-	return &categoryController{service: service}
+func ConstructorCategoryController(service *products.CategoryService, helper *helper.HelperController) *CategoryController {
+	return &CategoryController{
+		service: service,
+		helper:  helper,
+	}
 }
 
 // @summary Get All Data Category
@@ -29,7 +28,7 @@ func ConstructorCategoryController(service service.CategoryService) CategoryCont
 // @Failure 404 {object} ResponseErrorNotFound "No categories found"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /category [get]
-func (cs *categoryController) GetAllCategory(e echo.Context) error {
+func (cs *CategoryController) GetAllCategory(e echo.Context) error {
 	data, res, statusCode := cs.service.GetAllCategory()
 	if statusCode != 200 {
 		return e.JSON(statusCode, res)
@@ -49,7 +48,7 @@ func (cs *categoryController) GetAllCategory(e echo.Context) error {
 // @Failure 400 {object} ResponseErrorBadRequest "Invalid request or incomplete category data"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /admin/category [post]
-func (cs *categoryController) InputCategory(e echo.Context) error {
+func (cs *CategoryController) InputCategory(e echo.Context) error {
 	var response = make(map[string]interface{})
 
 	data := dto.Category{

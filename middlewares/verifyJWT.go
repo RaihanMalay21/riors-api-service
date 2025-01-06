@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// verify token signup email
 func VerifyAndExtractTokenClaims(c echo.Context, response map[string]interface{}) (*string, int) {
 	cookie, err := c.Cookie("register_riors_token")
 	if err != nil {
@@ -46,4 +47,31 @@ func VerifyAndExtractTokenClaims(c echo.Context, response map[string]interface{}
 
 	response["message"] = "Unauthorized"
 	return nil, http.StatusUnauthorized
+}
+
+// verify token reset password
+func VerifyResetPasswordToken(tokenStr string, response map[string]interface{}) (string, uint, int) {
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		return config.JWT_KEY, nil
+	})
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		id := claims["id"].(float64)
+		return claims["email"].(string), uint(id), http.StatusOK
+	}
+
+	if err != nil {
+		if errors.Is(err, jwt.ErrTokenSignatureInvalid) {
+			response["message"] = "Token signature is invalid"
+			return "", 0, http.StatusUnauthorized
+		} else if errors.Is(err, jwt.ErrTokenExpired) {
+			response["message"] = "Token signature has Expired"
+			return "", 0, http.StatusUnauthorized
+		} else {
+			response["error"] = err.Error()
+			return "", 0, http.StatusInternalServerError
+		}
+	}
+
+	response["message"] = "Unauthorized"
+	return "", 0, http.StatusUnauthorized
 }

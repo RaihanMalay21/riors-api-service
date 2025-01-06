@@ -1,4 +1,4 @@
-package controller
+package helper
 
 import (
 	"errors"
@@ -9,7 +9,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetFileFromForm(e echo.Context, response map[string]interface{}) (multipart.File, *multipart.FileHeader, string, string, int) {
+type HelperController struct{}
+
+func NewHelperController() *HelperController {
+	return &HelperController{}
+}
+
+func (hc *HelperController) GetFileFromForm(e echo.Context, response map[string]interface{}) (multipart.File, *multipart.FileHeader, string, string, int) {
 	fileHeader, err := e.FormFile("image")
 	if err != nil {
 		if errors.Is(err, http.ErrMissingFile) {

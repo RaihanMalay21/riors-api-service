@@ -11,10 +11,11 @@ func ProductDTOTODomain(data *dto.Product) domain.Product {
 	return domain.Product{
 		CategoryId:     data.CategoryId,
 		ProductName:    data.ProductName,
-		HargaBarang:    data.HargaBarang,
+		Price:          data.Price,
 		Type:           data.Type,
 		Image:          data.Image,
 		CategoryGender: data.CategoryGender,
+		Desc:           data.Desc,
 	}
 }
 
@@ -23,7 +24,7 @@ func ProductDomainTODTO(data *domain.Product) dto.Product {
 		Id:          data.Id,
 		CategoryId:  data.CategoryId,
 		ProductName: data.ProductName,
-		HargaBarang: data.HargaBarang,
+		Price:       data.Price,
 		Type:        data.Type,
 		Image:       data.Image,
 	}

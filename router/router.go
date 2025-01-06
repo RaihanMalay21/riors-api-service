@@ -11,9 +11,9 @@ import (
 
 func InitRouter(
 	e *echo.Echo,
-	product controllerProducts.ProductController,
-	category controllerProducts.CategoryController,
-	auth controllerAuth.AuthenticationController,
+	product *controllerProducts.ProductController,
+	category *controllerProducts.CategoryController,
+	auth *controllerAuth.AuthenticationController,
 ) {
 
 	e.Use(middlewares.CorsMiddlewares)
@@ -27,11 +27,15 @@ func InitRouter(
 	e.GET("/product/male", product.GetAllMale)
 
 	// authentication
-	protectedAuthentication := e.Group("authentication")
+	protectedAuthentication := e.Group("auth")
 	protectedAuthentication.POST("/login/user", auth.LoginUser)
 	protectedAuthentication.POST("/login/admin", auth.LoginAdmin)
 	protectedAuthentication.POST("/signup/user", auth.SignupUser)
 	protectedAuthentication.POST("/signup/user/verification", auth.SignupUserVerification) // access with token register_riors_token
+	protectedAuthentication.GET("/google", auth.HandleGoogleLogin)
+	protectedAuthentication.GET("/google/callback", auth.HandleGoogleCallback)
+	protectedAuthentication.POST("/forgot/password/user", auth.ForgotPasswordUser)
+	protectedAuthentication.POST("/reset/password", auth.ResetPasswordUser)
 
 	// user access with token user_riors_token
 	protectedUser := e.Group("/user")

@@ -26,9 +26,11 @@ type CategoryInput struct {
 
 type ProductInput struct {
 	CategoryId     uint    `json:"categoryId"`
-	ProductName    string  `json:"namaProduct"`
-	HargaBarang    float64 `json:"hargaProduct"`
-	Type           string  `json:"type"`
+	ProductName    string  `json:"productName"`
+	Price          float64 `json:"price"`
+	Desc           string  `json:"desc"`
+	DateRelase     string  `json:"dateRelase"`
+	Type           string  `json:"typeProduct"`
 	Image          string  `json:"image"`
 	CategoryGender string  `json:"categoryGender"`
 }

@@ -8,6 +8,7 @@ import (
 func main() {
 	config.ConnectionDB()
 	config.ConnectionRedis()
+	config.GoogleOuth20()
 
 	e := boostrap.SetupDependencies()
 

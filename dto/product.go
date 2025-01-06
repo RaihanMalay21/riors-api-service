@@ -9,8 +9,10 @@ type Product struct {
 	CreatedAt      time.Time        `json:"created_at"`
 	UpdatedAt      time.Time        `json:"updated_at"`
 	CategoryId     uint             `json:"categoryId" validate:"required"`
-	ProductName    string           `json:"namaProduct" validate:"required,max=100,uniqueProduct"`
-	HargaBarang    float64          `json:"hargaProduct" validate:"required,number"`
+	ProductName    string           `json:"productName" validate:"required,max=100,uniqueProduct"`
+	DateRelase     string           `json:"dateRelase" validate:"required,date_format"`
+	Price          float64          `json:"price" validate:"required,number"`
+	Desc           string           `json:"desc" validate:"required,max=200"`
 	Type           string           `json:"type" validate:"required,max=100"`
 	Image          string           `json:"image" validate:"required"`
 	CategoryGender string           `json:"categoryGender" validate:"required"`

@@ -1,34 +1,30 @@
 package authentication
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 
 	// "github.com/RaihanMalay21/api-service-riors/domain"
 	"github.com/RaihanMalay21/api-service-riors/config"
-	"github.com/RaihanMalay21/api-service-riors/controller"
+	"github.com/RaihanMalay21/api-service-riors/controller/helper"
 	"github.com/RaihanMalay21/api-service-riors/dto"
 	"github.com/RaihanMalay21/api-service-riors/middlewares"
-	service "github.com/RaihanMalay21/api-service-riors/service/authentication"
+	"github.com/RaihanMalay21/api-service-riors/service/authentication"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/oauth2"
 )
 
-type AuthenticationController interface {
-	LoginUser(c echo.Context) error
-	SignupUser(c echo.Context) error
-	SignupUserVerification(c echo.Context) error
-	LoginAdmin(c echo.Context) error
-	SignupEmploye(c echo.Context) error
-	ChangePasswordAdmin(c echo.Context) error
-	ChangePasswordUser(c echo.Context) error
+type AuthenticationController struct {
+	service *authentication.AuthenticationService
+	helper  *helper.HelperController
 }
 
-type authenticationController struct {
-	service service.AuthenticationService
-}
-
-func ConstructorAuthenticationController(service service.AuthenticationService) AuthenticationController {
-	return &authenticationController{service: service}
+func ConstructorAuthenticationController(service *authentication.AuthenticationService, helper *helper.HelperController) *AuthenticationController {
+	return &AuthenticationController{
+		service: service,
+		helper:  helper,
+	}
 }
 
 // @summary User login
@@ -40,8 +36,8 @@ func ConstructorAuthenticationController(service service.AuthenticationService) 
 // @Success 200  {object}  ResponseSuccess "Successfuly login, return a token to access enpoint for user"
 // @Failure 400  {object}  ResponseErrorBadRequest "Request invalid or the data sent is incorrect"
 // @Failure 500  {object}  ResponseErrorInternalServer "Mistake in the server"
-// @Router /authentication/login/user [post]
-func (as *authenticationController) LoginUser(c echo.Context) error {
+// @Router /auth/login/user [post]
+func (as *AuthenticationController) LoginUser(c echo.Context) error {
 	response := make(map[string]interface{})
 
 	email := c.FormValue("email")
@@ -65,8 +61,8 @@ func (as *authenticationController) LoginUser(c echo.Context) error {
 // @Success 200 {object} ResponseSuccess "Account successfully created temporery, return a token to verification email"
 // @Failure 400 {object} ResponseErrorBadRequest "Invalid request or incomplete data"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
-// @Router /authentication/signup/user [post]
-func (as *authenticationController) SignupUser(c echo.Context) error {
+// @Router /auth/signup/user [post]
+func (as *AuthenticationController) SignupUser(c echo.Context) error {
 	response := make(map[string]interface{})
 	register := new(dto.RegisterUser)
 	if err := c.Bind(&register); err != nil {
@@ -94,8 +90,8 @@ func (as *authenticationController) SignupUser(c echo.Context) error {
 // @Failure 400 {object} ResponseErrorBadRequest "Invalid or missing verification code"
 // @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
-// @Router /authentication/signup/user/verification [post]
-func (as *authenticationController) SignupUserVerification(c echo.Context) error {
+// @Router /auth/signup/user/verification [post]
+func (as *AuthenticationController) SignupUserVerification(c echo.Context) error {
 	response := make(map[string]interface{})
 
 	email, statusCode := middlewares.VerifyAndExtractTokenClaims(c, response)
@@ -120,8 +116,8 @@ func (as *authenticationController) SignupUserVerification(c echo.Context) error
 // @Failure 400 {object} ResponseErrorBadRequest "Invalid or missing"
 // @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
-// @Router /authentication/login/admin [post]
-func (as *authenticationController) LoginAdmin(c echo.Context) error {
+// @Router /auth/login/admin [post]
+func (as *AuthenticationController) LoginAdmin(c echo.Context) error {
 	response := make(map[string]interface{})
 
 	email := c.FormValue("email")
@@ -157,10 +153,10 @@ func (as *authenticationController) LoginAdmin(c echo.Context) error {
 // @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /admin/owner/register/employe [post]
-func (as *authenticationController) SignupEmploye(c echo.Context) error {
+func (as *AuthenticationController) SignupEmploye(c echo.Context) error {
 	response := make(map[string]interface{})
 
-	file, fileHeader, Ext, filetype, statusCode := controller.GetFileFromForm(c, response)
+	file, fileHeader, Ext, filetype, statusCode := as.helper.GetFileFromForm(c, response)
 	if statusCode != 200 {
 		return c.JSON(statusCode, response)
 	}
@@ -198,7 +194,7 @@ func (as *authenticationController) SignupEmploye(c echo.Context) error {
 // @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /admin/change/password [patch]
-func (as *authenticationController) ChangePasswordAdmin(c echo.Context) error {
+func (as *AuthenticationController) ChangePasswordAdmin(c echo.Context) error {
 	response := make(map[string]interface{})
 
 	claims, ok := c.Get("admin_claims").(*config.JWTClaim)
@@ -230,7 +226,7 @@ func (as *authenticationController) ChangePasswordAdmin(c echo.Context) error {
 // @Failure 401 {object} ResponsAuthorization "Unauthorized - Missing or invalid token"
 // @Failure 500 {object} ResponseErrorInternalServer "Internal server error while processing the request"
 // @Router /user/change/password [patch]
-func (as *authenticationController) ChangePasswordUser(c echo.Context) error {
+func (as *AuthenticationController) ChangePasswordUser(c echo.Context) error {
 	response := make(map[string]interface{})
 
 	claims, ok := c.Get("user_claims").(*config.JWTClaim)
@@ -248,4 +244,72 @@ func (as *authenticationController) ChangePasswordUser(c echo.Context) error {
 	statusCode := as.service.ChangePasswordUser(data, response)
 
 	return c.JSON(statusCode, response)
+}
+
+func (as *AuthenticationController) HandleGoogleLogin(c echo.Context) error {
+	url := config.GoogleOauth2Config.AuthCodeURL(config.RandomState, oauth2.AccessTypeOffline)
+	return c.Redirect(http.StatusFound, url)
+}
+
+func (as *AuthenticationController) HandleGoogleCallback(c echo.Context) error {
+	var response = make(map[string]interface{})
+	if c.QueryParam("state") != config.RandomState {
+		response["message"] = "State did not match"
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	code := c.QueryParam("code")
+	token, err := config.GoogleOauth2Config.Exchange(c.Request().Context(), code)
+	if err != nil {
+		response["error"] = "Failed to exchange token"
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	// Menggunakan token untuk mendapatkan informasi pengguna
+	client := config.GoogleOauth2Config.Client(c.Request().Context(), token)
+	resp, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
+	if err != nil {
+		response["error"] = "Failed to get user info"
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+	defer resp.Body.Close()
+
+	var userInfo map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
+		response["error"] = "Failed to parse user info"
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	cookie, statusCode := as.service.HandleGoogleCallback(userInfo["email"].(string), response)
+	if cookie == nil {
+		// redirect ke halamn login
+		return c.JSON(statusCode, response)
+	}
+
+	// redirect ke halaman user
+	c.SetCookie(cookie)
+	response["message"] = "login berhasil"
+	return c.JSON(http.StatusOK, response)
+}
+
+func (as *AuthenticationController) ForgotPasswordUser(e echo.Context) error {
+	response := make(map[string]interface{})
+
+	statusCode := as.service.ForgotPasswordUser(e.QueryParam("email"), response)
+
+	return e.JSON(statusCode, response)
+}
+
+func (as *AuthenticationController) ResetPasswordUser(e echo.Context) error {
+	response := make(map[string]interface{})
+
+	password := dto.ResetPassword{
+		Token: e.FormValue("token"),
+		Password: e.FormValue("password"),
+		PasswordRepeat: e.FormValue("passwordRepeat"),
+	}
+
+	statusCode := as.service.ResetPasswordUser(&password, response)
+	
+	return e.JSON(statusCode, response)
 }

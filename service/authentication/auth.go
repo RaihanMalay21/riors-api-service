@@ -13,33 +13,31 @@ import (
 	"github.com/RaihanMalay21/api-service-riors/mapper"
 	"github.com/RaihanMalay21/api-service-riors/middlewares"
 	repository "github.com/RaihanMalay21/api-service-riors/repository/authentication"
-	"github.com/RaihanMalay21/api-service-riors/service"
+	"github.com/RaihanMalay21/api-service-riors/service/helper"
+	"github.com/RaihanMalay21/api-service-riors/service/validate"
+	"github.com/RaihanMalay21/api-service-riors/validation"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-type AuthenticationService interface {
-	LoginUser(email string, password string, response map[string]interface{}) (*http.Cookie, int)
-	SignupUser(register *dto.RegisterUser, response map[string]interface{}) (*http.Cookie, int)
-	SignupUserVerification(email *string, code *string, response map[string]interface{}) int
-	LoginAdmin(email string, password string, response map[string]interface{}) (*http.Cookie, *http.Cookie, int)
-	SignupEmploye(file multipart.File, fileHeader *multipart.FileHeader, data *dto.Employee, response map[string]interface{}) int
-	ChangePasswordAdmin(data *dto.ChangePassword, response map[string]interface{}) int
-	ChangePasswordUser(data *dto.ChangePassword, response map[string]interface{}) int
+type AuthenticationService struct {
+	repo     *repository.AuthenticationRepository
+	helper   *helper.HelperService
+	validate *validate.ValidateService
 }
 
-type authenticationService struct {
-	repo repository.AuthenticationRepository
+func ConstructorAuthenticationService(repo *repository.AuthenticationRepository, helper *helper.HelperService, validate *validate.ValidateService) *AuthenticationService {
+	return &AuthenticationService{
+		repo:     repo,
+		helper:   helper,
+		validate: validate,
+	}
 }
 
-func ConstructorAuthenticationService(repo repository.AuthenticationRepository) AuthenticationService {
-	return &authenticationService{repo: repo}
-}
-
-func (ar *authenticationService) LoginUser(email string, password string, response map[string]interface{}) (*http.Cookie, int) {
+func (ar *AuthenticationService) LoginUser(email string, password string, response map[string]interface{}) (*http.Cookie, int) {
 	var res = make(map[string]string)
-	if err := service.ValidateLogin(email, password, &res); err != nil {
+	if err := ar.validate.ValidateLogin(email, password, &res); err != nil {
 		response["ErrorFields"] = res
 		return nil, http.StatusBadRequest
 	}
@@ -71,7 +69,7 @@ func (ar *authenticationService) LoginUser(email string, password string, respon
 
 	expToken := time.Now().Add(7 * 24 * time.Hour)
 	expCookie := 7 * 24 * 60 * 60
-	cookie, err := middlewares.CreateJWT(user.UserName, user.Id, expToken, "user_riors_token", expCookie, response)
+	cookie, err := middlewares.CreateJWT(user.Name, user.Id, expToken, "user_riors_token", expCookie, response)
 	if err != nil {
 		return nil, http.StatusInternalServerError
 	}
@@ -80,12 +78,12 @@ func (ar *authenticationService) LoginUser(email string, password string, respon
 	return cookie, http.StatusOK
 }
 
-func (ar *authenticationService) SignupUser(register *dto.RegisterUser, response map[string]interface{}) (*http.Cookie, int) {
-	if err := service.ValidateStructRegister(register, response); err != nil {
+func (ar *AuthenticationService) SignupUser(register *dto.RegisterUser, response map[string]interface{}) (*http.Cookie, int) {
+	if err := ar.validate.ValidateStructRegister(register, response); err != nil {
 		return nil, http.StatusBadRequest
 	}
 
-	register.Code = service.GenerateRandomNumber()
+	register.Code = ar.helper.GenerateRandomNumber()
 	expr := 5 * time.Minute
 
 	if err := ar.repo.PushRedisRegister(register, expr); err != nil {
@@ -93,7 +91,7 @@ func (ar *authenticationService) SignupUser(register *dto.RegisterUser, response
 		return nil, http.StatusInternalServerError
 	}
 
-	if err := service.EmailVerificationCode(&register.Email, &register.Code); err != nil {
+	if err := ar.helper.SendEmailVerificationCode(&register.Email, &register.Code); err != nil {
 		if err := ar.repo.DeleteRedisRegister(register.Email); err != nil {
 			response["error"] = err.Error()
 			return nil, http.StatusInternalServerError
@@ -113,7 +111,7 @@ func (ar *authenticationService) SignupUser(register *dto.RegisterUser, response
 	return cookie, http.StatusOK
 }
 
-func (ar *authenticationService) SignupUserVerification(email *string, code *string, response map[string]interface{}) int {
+func (ar *AuthenticationService) SignupUserVerification(email *string, code *string, response map[string]interface{}) int {
 	value, err := ar.repo.GetRediRegistrationByEmail(*email)
 	if err != nil {
 		if err == redis.Nil {
@@ -166,9 +164,9 @@ func (ar *authenticationService) SignupUserVerification(email *string, code *str
 	return http.StatusOK
 }
 
-func (ar *authenticationService) LoginAdmin(email string, password string, response map[string]interface{}) (*http.Cookie, *http.Cookie, int) {
+func (ar *AuthenticationService) LoginAdmin(email string, password string, response map[string]interface{}) (*http.Cookie, *http.Cookie, int) {
 	var res = make(map[string]string)
-	if err := service.ValidateLogin(email, password, &res); err != nil {
+	if err := ar.validate.ValidateLogin(email, password, &res); err != nil {
 		response["ErrorFields"] = res
 		return nil, nil, http.StatusBadRequest
 	}
@@ -225,8 +223,8 @@ func (ar *authenticationService) LoginAdmin(email string, password string, respo
 	return nil, nil, http.StatusInternalServerError
 }
 
-func (ar *authenticationService) SignupEmploye(file multipart.File, fileHeader *multipart.FileHeader, data *dto.Employee, response map[string]interface{}) int {
-	if err := service.ValidateStructEmployee(data, response); err != nil {
+func (ar *AuthenticationService) SignupEmploye(file multipart.File, fileHeader *multipart.FileHeader, data *dto.Employee, response map[string]interface{}) int {
+	if err := ar.validate.ValidateStructEmployee(data, response); err != nil {
 		return http.StatusBadRequest
 	}
 
@@ -256,7 +254,7 @@ func (ar *authenticationService) SignupEmploye(file multipart.File, fileHeader *
 		return http.StatusInternalServerError
 	}
 
-	if err := service.UploadToS3Admin(&dataDomain, file, fileHeader, data.Ext, data.ImageType); err != nil {
+	if err := ar.helper.UploadToS3Admin(&dataDomain, file, fileHeader, data.Ext, data.ImageType); err != nil {
 		tx.Rollback()
 		response["error"] = err.Error()
 		return http.StatusInternalServerError
@@ -274,8 +272,8 @@ func (ar *authenticationService) SignupEmploye(file multipart.File, fileHeader *
 	return http.StatusOK
 }
 
-func (ar *authenticationService) ChangePasswordAdmin(data *dto.ChangePassword, response map[string]interface{}) int {
-	if err := service.ValidateStructChangePassword(data, response); err != nil {
+func (ar *AuthenticationService) ChangePasswordAdmin(data *dto.ChangePassword, response map[string]interface{}) int {
+	if err := ar.validate.ValidateStructChangePassword(data, response); err != nil {
 		return http.StatusBadRequest
 	}
 
@@ -322,8 +320,8 @@ func (ar *authenticationService) ChangePasswordAdmin(data *dto.ChangePassword, r
 	return http.StatusOK
 }
 
-func (ar *authenticationService) ChangePasswordUser(data *dto.ChangePassword, response map[string]interface{}) int {
-	if err := service.ValidateStructChangePassword(data, response); err != nil {
+func (ar *AuthenticationService) ChangePasswordUser(data *dto.ChangePassword, response map[string]interface{}) int {
+	if err := ar.validate.ValidateStructChangePassword(data, response); err != nil {
 		return http.StatusBadRequest
 	}
 
@@ -366,5 +364,76 @@ func (ar *authenticationService) ChangePasswordUser(data *dto.ChangePassword, re
 	}
 
 	response["success"] = "successfully Change Password"
+	return http.StatusOK
+}
+
+func (ar *AuthenticationService) HandleGoogleCallback(email string, response map[string]interface{}) (*http.Cookie, int) {
+	boolUser, User := validation.IsUniqueEmailUser(email)
+	if boolUser {
+		if err := ar.repo.CreateUser(&domain.User{Email: email}); err != nil {
+			response["error"] = err.Error()
+			return nil, http.StatusInternalServerError
+		}
+		response["success"] = "Signup berhasil"
+		return nil, http.StatusOK
+	}
+
+	expJwt := time.Now().Add(7 * 24 * 60 * 60)
+	expCookie := 7 * 24 * 60 * 60
+	cookieUser, err := middlewares.CreateJWT(User.Email, User.Id, expJwt, "user_riors_token", expCookie, response)
+	if err != nil {
+		return nil, http.StatusInternalServerError
+	}
+
+	return cookieUser, http.StatusOK
+}
+
+func (ar *AuthenticationService) ForgotPasswordUser(email string, response map[string]interface{}) int {
+	if email == "" {
+		response["ErrorField"] = map[string]string{"email": "Email field cannot be empty"}
+		return http.StatusBadRequest
+	}
+
+	boolUser, user := validation.IsUniqueEmailUser(email)
+	if boolUser {
+		response["ErrorField"] = map[string]string{"email": "Your email not found"}
+		return http.StatusBadRequest
+	}
+
+	tokenStr, err := middlewares.GenerateResetPasswordToken(email, user.Id, time.Now().Add(5*time.Minute), response)
+	if err != nil {
+		return http.StatusInternalServerError
+	}
+
+	endpointResetPassword := fmt.Sprintf("http://localhost:8080/auth/reset/password?token=%s", tokenStr)
+
+	if err := ar.helper.SendEmailForgotPassword(email, user.Name, endpointResetPassword); err != nil {
+		response["error"] = err.Error()
+		return http.StatusInternalServerError
+	}
+
+	response["success"] = "Wait until we send an email and check your email"
+	return http.StatusOK
+}
+
+func (ar *AuthenticationService) ResetPasswordUser(resetPassword *dto.ResetPassword, response map[string]interface{}) int {
+	_, userId, statusCode := middlewares.VerifyResetPasswordToken(resetPassword.Token, response)
+	if statusCode != 200 {
+		fmt.Println("errprvnlfnfl")
+		return statusCode
+	}
+
+	if err := ar.validate.ValidateStructResetPassword(resetPassword, response); err != nil {
+		return http.StatusBadRequest
+	}
+
+	hashPassword, _ := bcrypt.GenerateFromPassword([]byte(resetPassword.Password), bcrypt.DefaultCost)
+
+	if err := ar.repo.UpdatePasswordById(string(hashPassword), userId, "user"); err != nil {
+		response["error"] = err.Error()
+		return http.StatusInternalServerError
+	}
+
+	response["success"] = "Successfully reset password, please login again"
 	return http.StatusOK
 }

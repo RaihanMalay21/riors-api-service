@@ -18,6 +18,9 @@ var (
 )
 
 func ConnectionDB() {
+	// if err := godotenv.Load(); err != nil {
+	// 	log.Println(err)
+	// }
 
 	userDB := os.Getenv("DB_USER")
 	passwordDB := os.Getenv("DB_PASSWORD")
@@ -39,7 +42,7 @@ func ConnectionDB() {
 		log.Fatalf("Failed to connected database: %v", err)
 	}
 
-	db.AutoMigrate(&domain.Category{}, &domain.Product{}, &domain.DetailProduct{})
+	db.AutoMigrate(&domain.Category{}, &domain.Product{}, &domain.ProductVariant{})
 	db.AutoMigrate(&domain.User{}, &domain.Address{})
 	db.AutoMigrate(&domain.Employee{})
 

@@ -88,13 +88,17 @@ definitions:
         type: string
       categoryId:
         type: integer
-      hargaProduct:
-        type: number
+      dateRelase:
+        type: string
+      desc:
+        type: string
       image:
         type: string
-      namaProduct:
+      price:
+        type: number
+      productName:
         type: string
-      type:
+      typeProduct:
         type: string
     type: object
   products.ResponseErrorBadRequest:
@@ -316,7 +320,7 @@ paths:
       summary: Add data Product
       tags:
       - admin
-  /authentication/login/admin:
+  /auth/login/admin:
     post:
       consumes:
       - application/x-www-form-urlencoded
@@ -350,7 +354,7 @@ paths:
       summary: Admin login
       tags:
       - authentication
-  /authentication/login/user:
+  /auth/login/user:
     post:
       consumes:
       - application/x-www-form-urlencoded
@@ -381,7 +385,7 @@ paths:
       summary: User login
       tags:
       - authentication
-  /authentication/signup/user:
+  /auth/signup/user:
     post:
       consumes:
       - application/json
@@ -416,7 +420,7 @@ paths:
       summary: Create New User Account
       tags:
       - authentication
-  /authentication/signup/user/verification:
+  /auth/signup/user/verification:
     post:
       consumes:
       - application/x-www-form-urlencoded

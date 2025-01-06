@@ -1,4 +1,4 @@
-package service
+package validate
 
 import (
 	"errors"
@@ -10,7 +10,13 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func ValidateStructProduct(data *dto.Product, response map[string]interface{}) error {
+type ValidateService struct{}
+
+func NewValidateService() *ValidateService {
+	return &ValidateService{}
+}
+
+func (vs *ValidateService) ValidateStructProduct(data *dto.Product, response map[string]interface{}) error {
 	trans := validation.TranslatorIDN()
 	validate := validator.New()
 	validation.RegisterCustomValidationsProduct(validate, trans)
@@ -35,7 +41,7 @@ func ValidateStructProduct(data *dto.Product, response map[string]interface{}) e
 	return nil
 }
 
-func ValidateStructRegister(data *dto.RegisterUser, response map[string]interface{}) error {
+func (vs *ValidateService) ValidateStructRegister(data *dto.RegisterUser, response map[string]interface{}) error {
 	trans := validation.TranslatorIDN()
 	validate := validator.New()
 	validation.RegisterCustomValidationsProduct(validate, trans)
@@ -57,7 +63,7 @@ func ValidateStructRegister(data *dto.RegisterUser, response map[string]interfac
 	return nil
 }
 
-func ValidateStructEmployee(data *dto.Employee, response map[string]interface{}) error {
+func (vs *ValidateService) ValidateStructEmployee(data *dto.Employee, response map[string]interface{}) error {
 	trans := validation.TranslatorIDN()
 	validate := validator.New()
 	validation.RegisterCustomValidationsProduct(validate, trans)
@@ -79,7 +85,7 @@ func ValidateStructEmployee(data *dto.Employee, response map[string]interface{})
 	return nil
 }
 
-func ValidateStructChangePassword(data *dto.ChangePassword, response map[string]interface{}) error {
+func (vs *ValidateService) ValidateStructChangePassword(data *dto.ChangePassword, response map[string]interface{}) error {
 	trans := validation.TranslatorIDN()
 	validate := validator.New()
 	validation.RegisterCustomValidationsProduct(validate, trans)
@@ -101,7 +107,56 @@ func ValidateStructChangePassword(data *dto.ChangePassword, response map[string]
 	return nil
 }
 
-func ValidateFileExtention(fileHeader *multipart.FileHeader) (string, error) {
+func (vs *ValidateService) ValidateStructResetPassword(data *dto.ResetPassword, response map[string]interface{}) error {
+	if data.Password != data.PasswordRepeat {
+		response["ErrorField"] = map[string]string{"passwordRepeat": "Password do not match. Please try again"}
+		return errors.New("Password Repeat tidak sesuai dengan password")
+	}
+
+	trans := validation.TranslatorIDN()
+	validate := validator.New()
+	validation.RegisterCustomValidationsProduct(validate, trans)
+
+	if err := validate.Struct(data); err != nil {
+		var errsMessage []map[string]string
+		for _, err := range err.(validator.ValidationErrors) {
+			errField := err.StructField()
+			errTranslate := err.Translate(trans)
+			errs := map[string]string{
+				errField: errTranslate,
+			}
+			errsMessage = append(errsMessage, errs)
+		}
+		response["ErrorField"] = errsMessage
+		return err
+	}
+
+	return nil
+}
+
+func (vs *ValidateService) ValidateStructChart(data *dto.Cart, response map[string]interface{}) error {
+	trans := validation.TranslatorIDN()
+	validate := validator.New()
+	validation.RegisterCustomValidationsProduct(validate, trans)
+
+	if err := validate.Struct(data); err != nil {
+		var errsMessage []map[string]string
+		for _, err := range err.(validator.ValidationErrors) {
+			errField := err.StructField()
+			errTranslate := err.Translate(trans)
+			errs := map[string]string{
+				errField: errTranslate,
+			}
+			errsMessage = append(errsMessage, errs)
+		}
+		response["ErrorField"] = errsMessage
+		return err
+	}
+
+	return nil
+}
+
+func (vs *ValidateService) ValidateFileExtention(fileHeader *multipart.FileHeader) (string, error) {
 	ext := filepath.Ext(fileHeader.Filename) // extention file image
 	if ext != ".jpg" && ext != ".png" && ext != ".gift" {
 		return "", errors.New("Invalid file extention, .jpg, .png, and .gift only are allowed")
@@ -109,14 +164,14 @@ func ValidateFileExtention(fileHeader *multipart.FileHeader) (string, error) {
 	return ext, nil
 }
 
-func ValidateFileSize(fileHeader *multipart.FileHeader) error {
+func (vs *ValidateService) ValidateFileSize(fileHeader *multipart.FileHeader) error {
 	if fileHeader.Size > 2000000 {
 		return errors.New("file to large, max size file 2mb")
 	}
 	return nil
 }
 
-func ValidateLogin(email string, password string, response *map[string]string) error {
+func (vs *ValidateService) ValidateLogin(email string, password string, response *map[string]string) error {
 	if email == "" {
 		(*response)["email"] = "email tidak boleh kosong"
 	} else if password == "" {

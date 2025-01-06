@@ -1,4 +1,4 @@
-package service
+package helper
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"mime/multipart"
 	"net/smtp"
@@ -18,22 +19,29 @@ import (
 	"github.com/RaihanMalay21/api-service-riors/middlewares"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/joho/godotenv"
 )
 
-func DestinationFolder(pathFolder, nameFile string) string {
+type HelperService struct{}
+
+func NewHelperService() *HelperService {
+	return &HelperService{}
+}
+
+func (hs *HelperService) DestinationFolder(pathFolder, nameFile string) string {
 	// menentukan path dir untuk file yang akan di create
 	filePath := filepath.Join(pathFolder, nameFile)
 
 	return filePath
 }
 
-func CreateImage(data *domain.Product, image multipart.File, fileHeader *multipart.FileHeader, ext string) error {
+func (hs *HelperService) CreateImage(data *domain.Product, image multipart.File, fileHeader *multipart.FileHeader, ext string) error {
 	nameFile := filepath.Base(fileHeader.Filename[:len(fileHeader.Filename)-len(ext)]) // mengambil nama filenya saja
 	hasher := sha256.Sum256([]byte(nameFile))                                          // mengkonversi nama file menggunakan sha256 menjadi byte dan ubah menjadi string
 	hashingNameImageString := hex.EncodeToString(hasher[:])
 	data.Image = hashingNameImageString + strconv.Itoa(int(data.Id)) + ext
 
-	createdPathImage := DestinationFolder("C:\\Users\\acer\\Downloads\\riors-service\\api-service-riors\\assets", data.Image)
+	createdPathImage := hs.DestinationFolder("C:\\Users\\acer\\Downloads\\riors-service\\api-service-riors\\assets", data.Image)
 
 	outfile, err := os.Create(createdPathImage)
 	if err != nil {
@@ -49,7 +57,7 @@ func CreateImage(data *domain.Product, image multipart.File, fileHeader *multipa
 	return nil
 }
 
-func UploadToS3(data *domain.Product, file multipart.File, fileHeader *multipart.FileHeader, ext string, imageType string) error {
+func (hs *HelperService) UploadToS3(data *domain.Product, file multipart.File, fileHeader *multipart.FileHeader, ext string, imageType string) error {
 
 	sess, err := middlewares.InitAWSSession()
 	if err != nil {
@@ -85,7 +93,7 @@ func UploadToS3(data *domain.Product, file multipart.File, fileHeader *multipart
 	return nil
 }
 
-func UploadToS3Admin(data *domain.Employee, file multipart.File, fileHeader *multipart.FileHeader, ext string, imageType string) error {
+func (hs *HelperService) UploadToS3Admin(data *domain.Employee, file multipart.File, fileHeader *multipart.FileHeader, ext string, imageType string) error {
 
 	sess, err := middlewares.InitAWSSession()
 	if err != nil {
@@ -121,7 +129,7 @@ func UploadToS3Admin(data *domain.Employee, file multipart.File, fileHeader *mul
 	return nil
 }
 
-func GenerateRandomNumber() int {
+func (hs *HelperService) GenerateRandomNumber() int {
 	rand.Seed(time.Now().UnixNano())
 
 	randomNumber := rand.Intn(90000000) + 10000000
@@ -129,11 +137,80 @@ func GenerateRandomNumber() int {
 	return randomNumber
 }
 
-func EmailVerificationCode(email *string, verificationCode *int) error {
+func (hs *HelperService) SendEmailForgotPassword(email, username, link string) error {
+	if err := godotenv.Load(); err != nil {
+		log.Println(err)
+	}
+
+	smtpUser := os.Getenv("SMTP_USER")
+	smtpPass := os.Getenv("SMTP_PASS")
 	Auth := smtp.PlainAuth(
 		"",
-		"cabangbanyak@gmail.com",
-		"lnbq rahl xyyg fwcy",
+		smtpUser,
+		smtpPass,
+		"smtp.gmail.com",
+	)
+
+	subject := "Change Password"
+
+	body := fmt.Sprintf(`
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>Reset Your Password</title>
+			<style>
+				body { font-family: Arial, sans-serif; line-height: 1.6; }
+				.container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+				.btn { background-color: #007BFF; color: white; text-decoration: none; padding: 12px 20px; border-radius: 5px; display: inline-block; }
+				.footer { font-size: 0.9em; color: #555; margin-top: 20px; }
+			</style>
+		</head>
+		<body>
+			<div class="container">
+				<h2>Reset Your Password</h2>
+				<p>Hi %s,</p>
+				<p>We received a request to reset your password for your account. Please click the button below to reset your password:</p>
+				<p><a href="%s" class="btn">Reset Password</a></p>
+				<p>If you did not request this, you can safely ignore this email. This link will expire in %d minute for security reasons.</p>
+				<p>Thank you,<br>The Support Team</p>
+				<div class="footer">
+					<p>Need help? Contact us at <a href="mailto:riors@gmail.com">riors@gmail.com</a></p>
+				</div>
+			</div>
+		</body>
+		</html>
+	`, username, link, 5)
+
+	header := "MIME-Version: 1.0\r\n" +
+		"Content-Type: text/html; charset=\"UTF-8\"\r\n"
+
+	msg := []byte("To: " + email + "\r\n" +
+		"Subject: " + subject + "\r\n" + header + "\r\n" + body)
+
+	// kirim mesage ke email user
+	if err := smtp.SendMail(
+		"smtp.gmail.com:587",
+		Auth,
+		smtpUser,
+		[]string{email},
+		msg,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (hs *HelperService) SendEmailVerificationCode(email *string, verificationCode *int) error {
+	smtpUser := os.Getenv("SMTP_USER")
+	smtpPass := os.Getenv("SMTP_PASS")
+
+	Auth := smtp.PlainAuth(
+		"",
+		smtpUser,
+		smtpPass,
 		"smtp.gmail.com",
 	)
 
@@ -166,7 +243,7 @@ func EmailVerificationCode(email *string, verificationCode *int) error {
 	if err := smtp.SendMail(
 		"smtp.gmail.com:587",
 		Auth,
-		"cabangbanyak@gmail.com",
+		smtpUser,
 		[]string{*email},
 		msg,
 	); err != nil {
@@ -174,4 +251,14 @@ func EmailVerificationCode(email *string, verificationCode *int) error {
 	}
 
 	return nil
+}
+
+func (hs *HelperService) ConvertDateStringToTime(date string, response map[string]interface{}) time.Time {
+	layout := "2006-01-02"
+	dateParse, err := time.Parse(layout, date)
+	if err != nil {
+		response["error"] = err.Error()
+		return time.Time{}
+	}
+	return dateParse
 }

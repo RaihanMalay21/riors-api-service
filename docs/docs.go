@@ -277,7 +277,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/authentication/login/admin": {
+        "/auth/login/admin": {
             "post": {
                 "description": "This endpoint is used to login by email and password.",
                 "consumes": [
@@ -329,7 +329,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/authentication/login/user": {
+        "/auth/login/user": {
             "post": {
                 "description": "This enpoint is used to authenticate users with send cridential data (email dan password).",
                 "consumes": [
@@ -375,7 +375,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/authentication/signup/user": {
+        "/auth/signup/user": {
             "post": {
                 "description": "This endpoint is used to create a new user account by submitting registration data in JSON format. Users are required to provide information email, and password. The data will be validated on the server side before the account is created temporary, client have navigate to endpoint signup verification on the client side.",
                 "consumes": [
@@ -421,7 +421,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/authentication/signup/user/verification": {
+        "/auth/signup/user/verification": {
             "post": {
                 "security": [
                     {
@@ -815,16 +815,22 @@ const docTemplate = `{
                 "categoryId": {
                     "type": "integer"
                 },
-                "hargaProduct": {
-                    "type": "number"
+                "dateRelase": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
                 },
-                "namaProduct": {
+                "price": {
+                    "type": "number"
+                },
+                "productName": {
                     "type": "string"
                 },
-                "type": {
+                "typeProduct": {
                     "type": "string"
                 }
             }

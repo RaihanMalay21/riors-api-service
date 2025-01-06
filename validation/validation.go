@@ -78,7 +78,8 @@ func RegisterCustomValidationsProduct(validate *validator.Validate, trans ut.Tra
 
 	validate.RegisterValidation("uniqueEmailUser", func(fl validator.FieldLevel) bool {
 		content := fl.Field().String()
-		return isUniqueEmailUser(content)
+		boolUser, _ := IsUniqueEmailUser(content)
+		return boolUser
 	})
 
 	validate.RegisterTranslation("uniqueEmailUser", trans, func(ut ut.Translator) error {
@@ -184,6 +185,18 @@ func RegisterCustomValidationsProduct(validate *validator.Validate, trans ut.Tra
 		return t
 	})
 
+	validate.RegisterValidation("requiredToken", func(fl validator.FieldLevel) bool {
+		content := fl.Field().String()
+		return isRequiredField(content)
+	})
+
+	validate.RegisterTranslation("requiredToken", trans, func(ut ut.Translator) error {
+		return ut.Add("requiredToken", "Your password reset link has expired. Please initiate the password reset process again if you still need assistance", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("requiredToken", fe.Field())
+		return t
+	})
+
 	// validate.RegisterValidation("minUppercase", func(fl validator.FieldLevel) bool {
 	// 	sizeFile := fl.Field.string()
 	// 	return
@@ -243,6 +256,10 @@ func RegisterCustomValidationsProduct(validate *validator.Validate, trans ut.Tra
 
 }
 
+func isRequiredField(field string) bool {
+	return field != ""
+}
+
 func isMaxSizeFile(Size uint) bool {
 	return Size <= 2000000
 }
@@ -250,7 +267,10 @@ func isMaxSizeFile(Size uint) bool {
 func isUniqueProduct(productName string) bool {
 	var product domain.Product
 	if err := config.DB.Where("product_name = ?", productName).First(&product).Error; err != nil {
-		return errors.Is(err, gorm.ErrRecordNotFound)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return true
+		}
+		return false
 	}
 	return false
 }
@@ -282,18 +302,24 @@ func isMinUniCharacter(content string) bool {
 	return false
 }
 
-func isUniqueEmailUser(email string) bool {
+func IsUniqueEmailUser(email string) (bool, *domain.User) {
 	var user domain.User
 	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		return errors.Is(err, gorm.ErrRecordNotFound)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return true, nil
+		}
+		return false, nil
 	}
-	return false
+	return false, &user
 }
 
 func isUniqueEmailEmployee(email string) bool {
 	var user domain.Employee
 	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		return errors.Is(err, gorm.ErrRecordNotFound)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return true
+		}
+		return false
 	}
 	return false
 }
@@ -301,7 +327,10 @@ func isUniqueEmailEmployee(email string) bool {
 func isUniqueWhatshappUser(nomor string) bool {
 	var user domain.User
 	if err := config.DB.Where("whatsapp = ?", nomor).First(&user).Error; err != nil {
-		return errors.Is(err, gorm.ErrRecordNotFound)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return true
+		}
+		return false
 	}
 	return false
 }
@@ -309,11 +338,13 @@ func isUniqueWhatshappUser(nomor string) bool {
 func isUniqueWhatsappEmployee(nomor string) bool {
 	var user domain.Employee
 	if err := config.DB.Where("whatsapp = ?", nomor).First(&user).Error; err != nil {
-		return errors.Is(err, gorm.ErrRecordNotFound)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return true
+		}
+		return false
 	}
 	return false
 }
-
 
 func isWhatsapp(nomor string) bool {
 	regex := `^\+?[0-9]{8,15}$`

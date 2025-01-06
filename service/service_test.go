@@ -3,9 +3,12 @@ package service
 import (
 	"fmt"
 	"testing"
+
+	"github.com/RaihanMalay21/api-service-riors/service/helper"
 )
 
 func TestService(t *testing.T) {
-	value := GenerateRandomNumber()
+	var helper helper.HelperService
+	value := helper.GenerateRandomNumber()
 	fmt.Println(value)
 }

@@ -9,6 +9,7 @@ func main() {
 	config.ConnectionDB()
 	config.ConnectionRedis()
 	config.GoogleOuth20()
+	config.Websocket()
 
 	e := boostrap.SetupDependencies()
 

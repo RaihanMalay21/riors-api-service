@@ -10,7 +10,7 @@ var (
 )
 
 func ConnectionRedis() {
-	addrRedis := os.Getenv("REDIS_URL")
+	addrRedis := os.Getenv("REDIS_URL_LOCAL")
 
 	opt, err := redis.ParseURL(addrRedis)
 	if err != nil {

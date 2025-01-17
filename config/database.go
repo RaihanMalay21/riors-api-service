@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/RaihanMalay21/api-service-riors/domain"
-	// "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -18,9 +18,9 @@ var (
 )
 
 func ConnectionDB() {
-	// if err := godotenv.Load(); err != nil {
-	// 	log.Println(err)
-	// }
+	if err := godotenv.Load(); err != nil {
+		log.Println(err)
+	}
 
 	userDB := os.Getenv("DB_USER")
 	passwordDB := os.Getenv("DB_PASSWORD")

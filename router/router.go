@@ -1,10 +1,12 @@
 package router
 
 import (
+	controllerAdmin "github.com/RaihanMalay21/api-service-riors/controller/admin"
 	controllerAuth "github.com/RaihanMalay21/api-service-riors/controller/authentication"
 	controllerProducts "github.com/RaihanMalay21/api-service-riors/controller/products"
 	_ "github.com/RaihanMalay21/api-service-riors/docs"
 	"github.com/RaihanMalay21/api-service-riors/middlewares"
+	"github.com/RaihanMalay21/api-service-riors/websocket"
 	"github.com/labstack/echo/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
@@ -14,10 +16,13 @@ func InitRouter(
 	product *controllerProducts.ProductController,
 	category *controllerProducts.CategoryController,
 	auth *controllerAuth.AuthenticationController,
+	adminUser *controllerAdmin.AdminUserController,
+	websocket *websocket.WebsocketRiors,
 ) {
 
 	e.Use(middlewares.CorsMiddlewares)
 	e.Use(middlewares.SetLimiterMiddleware)
+	// e.Use(middlewares.DetectionStatusActiveUser)
 
 	// general access without token access
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -40,6 +45,7 @@ func InitRouter(
 	// user access with token user_riors_token
 	protectedUser := e.Group("/user")
 	protectedUser.Use(middlewares.ArmorUser)
+	protectedUser.GET("/active/ws", websocket.WebsocketDetectionStatusActiveUser)
 	protectedUser.PATCH("/change/password", auth.ChangePasswordUser)
 
 	// admin access with token admin_riors_token
@@ -48,6 +54,7 @@ func InitRouter(
 	protectedAdmin.PATCH("/change/password", auth.ChangePasswordAdmin)
 	protectedAdmin.POST("/category", category.InputCategory)
 	protectedAdmin.POST("/product", product.InputProduct)
+	// protectedAdmin.GET("/users/active", adminUser.GetUserActive)
 
 	// owner access with token owner_riors_token based on position employee
 	protectedOwner := protectedAdmin.Group("/owner")

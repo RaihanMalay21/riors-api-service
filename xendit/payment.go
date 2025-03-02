@@ -16,7 +16,7 @@ type PaymentXendit struct {
 }
 
 func (p *PaymentXendit) XenditClient() {
-	client := xendit.NewClient("xnd_development_8jTP7KPfzhIQqRdwebLJYPYO4rru7R904RL8Kxg96nhLBQSwkknvZcvnEdNXk1")
+	client := xendit.NewClient("")
 	p.xenditClient = client
 }
 
